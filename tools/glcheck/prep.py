@@ -33,3 +33,20 @@ for f in sorted(root.glob('*.fsh')):
     t = substitute_options(expand(f.read_text()))
     t = t.replace('#version 330 compatibility', '#version 410 core')
     (out / f.name).write_text(t)
+
+
+def vsh_to_core(t):
+    """Fullscreen-pass vertex shaders -> core GLSL driven by gl_VertexID."""
+    t = t.replace('#version 330 compatibility', '#version 410 core')
+    t = t.replace('ftransform()', 'vec4(fsq * 2.0 - 1.0, 0.0, 1.0)')
+    t = t.replace('gl_MultiTexCoord0.xy', 'fsq')
+    return re.sub(r'void main\(\)\s*\{',
+                  'void main() {\n    vec2 fsq = vec2(float((gl_VertexID << 1) & 2), float(gl_VertexID & 2));',
+                  t, count=1)
+
+
+for f in sorted(root.glob('*.vsh')):
+    if f.name.startswith('gbuffers_'):
+        continue          # real geometry; checked in-game
+    t = substitute_options(expand(f.read_text()))
+    (out / f.name).write_text(vsh_to_core(t))

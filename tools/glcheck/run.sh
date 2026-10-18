@@ -11,4 +11,4 @@ mkdir -p "$BUILD"
 clang -o "$BUILD/check" "$HERE/check.c" -framework OpenGL
 rm -rf "$BUILD/out"
 python3 -I "$HERE/prep.py" "$PACK" "$BUILD/out"
-"$BUILD/check" $(for f in "$BUILD"/out/*.fsh; do echo fs "$f"; done)
+"$BUILD/check" $(for f in "$BUILD"/out/*.fsh; do echo fs "$f"; done) $(for f in "$BUILD"/out/*.vsh; do echo vs "$f"; done)

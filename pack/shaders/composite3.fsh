@@ -1,6 +1,6 @@
 #version 330 compatibility
 
-// Bloom downsample: colortex5 (1/4) -> colortex6 (1/8).
+// Bloom downsample, 4x per pass: colortex5 (1/8) -> colortex6 (1/32).
 
 /* RENDERTARGETS: 6 */
 
@@ -13,10 +13,15 @@ in vec2 texcoord;
 layout(location = 0) out vec4 outColor;
 
 void main() {
-    vec2 ts = vec2(4.0 / viewWidth, 4.0 / viewHeight);
-    vec3 sum = texture(colortex5, texcoord + ts * vec2( 1.0,  1.0)).rgb;
-    sum     += texture(colortex5, texcoord + ts * vec2(-1.0,  1.0)).rgb;
-    sum     += texture(colortex5, texcoord + ts * vec2( 1.0, -1.0)).rgb;
-    sum     += texture(colortex5, texcoord + ts * vec2(-1.0, -1.0)).rgb;
-    outColor = vec4(sum * 0.25, 1.0);
+    vec2 s = vec2(16.0 / viewWidth, 16.0 / viewHeight);  // 2 source texels
+    vec3 sum = texture(colortex5, texcoord).rgb * 4.0;
+    sum += texture(colortex5, texcoord + vec2( s.x, 0.0)).rgb * 2.0;
+    sum += texture(colortex5, texcoord + vec2(-s.x, 0.0)).rgb * 2.0;
+    sum += texture(colortex5, texcoord + vec2(0.0,  s.y)).rgb * 2.0;
+    sum += texture(colortex5, texcoord + vec2(0.0, -s.y)).rgb * 2.0;
+    sum += texture(colortex5, texcoord + vec2( s.x,  s.y)).rgb;
+    sum += texture(colortex5, texcoord + vec2(-s.x,  s.y)).rgb;
+    sum += texture(colortex5, texcoord + vec2( s.x, -s.y)).rgb;
+    sum += texture(colortex5, texcoord + vec2(-s.x, -s.y)).rgb;
+    outColor = vec4(sum / 16.0, 1.0);
 }

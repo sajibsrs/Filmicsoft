@@ -1,23 +1,46 @@
 #version 330 compatibility
 
-// Bloom downsample: colortex4 (1/2) -> colortex5 (1/4).
+// Bloom downsample, 4x per pass: colortex4 (1/2) -> colortex5 (1/8).
+// Also builds the diffusion source ("pro-mist"): a wide blur of the plain
+// half-res scene copy colortex10 -> colortex9, same size so it shares the pass.
+// Nine bilinear taps in a 3x3 tent, spaced two source texels apart, so the
+// whole 6x6 neighbourhood is covered without gaps.
 
-/* RENDERTARGETS: 5 */
+/* RENDERTARGETS: 5,9 */
 
 uniform sampler2D colortex4;
+uniform sampler2D colortex10;
 uniform float viewWidth;
 uniform float viewHeight;
 
 in vec2 texcoord;
 
 layout(location = 0) out vec4 outColor;
+layout(location = 1) out vec4 outDiffuse;
 
 void main() {
-    // Source is half resolution, so one source texel = 2 full-res pixels.
-    vec2 ts = vec2(2.0 / viewWidth, 2.0 / viewHeight);
-    vec3 sum = texture(colortex4, texcoord + ts * vec2( 1.0,  1.0)).rgb;
-    sum     += texture(colortex4, texcoord + ts * vec2(-1.0,  1.0)).rgb;
-    sum     += texture(colortex4, texcoord + ts * vec2( 1.0, -1.0)).rgb;
-    sum     += texture(colortex4, texcoord + ts * vec2(-1.0, -1.0)).rgb;
-    outColor = vec4(sum * 0.25, 1.0);
+    vec2 s = vec2(4.0 / viewWidth, 4.0 / viewHeight);   // 2 source texels
+    vec3 sum = texture(colortex4, texcoord).rgb * 4.0;
+    sum += texture(colortex4, texcoord + vec2( s.x, 0.0)).rgb * 2.0;
+    sum += texture(colortex4, texcoord + vec2(-s.x, 0.0)).rgb * 2.0;
+    sum += texture(colortex4, texcoord + vec2(0.0,  s.y)).rgb * 2.0;
+    sum += texture(colortex4, texcoord + vec2(0.0, -s.y)).rgb * 2.0;
+    sum += texture(colortex4, texcoord + vec2( s.x,  s.y)).rgb;
+    sum += texture(colortex4, texcoord + vec2(-s.x,  s.y)).rgb;
+    sum += texture(colortex4, texcoord + vec2( s.x, -s.y)).rgb;
+    sum += texture(colortex4, texcoord + vec2(-s.x, -s.y)).rgb;
+    outColor = vec4(sum / 16.0, 1.0);
+
+    // Diffusion: same 3x3 tent, but spread 4 half-res texels (8 px) apart.
+    vec2 d = vec2(8.0 / viewWidth, 8.0 / viewHeight);
+    vec3 df = texture(colortex10, texcoord).rgb * 4.0;
+    df += texture(colortex10, texcoord + vec2( d.x, 0.0)).rgb * 2.0;
+    df += texture(colortex10, texcoord + vec2(-d.x, 0.0)).rgb * 2.0;
+    df += texture(colortex10, texcoord + vec2(0.0,  d.y)).rgb * 2.0;
+    df += texture(colortex10, texcoord + vec2(0.0, -d.y)).rgb * 2.0;
+    df += texture(colortex10, texcoord + vec2( d.x,  d.y)).rgb;
+    df += texture(colortex10, texcoord + vec2(-d.x,  d.y)).rgb;
+    df += texture(colortex10, texcoord + vec2( d.x, -d.y)).rgb;
+    df += texture(colortex10, texcoord + vec2(-d.x, -d.y)).rgb;
+    outDiffuse = vec4(df / 16.0, 1.0);
 }

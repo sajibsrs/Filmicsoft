@@ -9,19 +9,20 @@ Windows and Linux: no compute shaders, no SSBOs.
 
 - `pack/shaders/` - the shader pack itself (installed as `Filmicsoft` in `shaderpacks/`)
   - `lib/options.glsl` - every user option, shared by all passes
-  - `gbuffers_*.fsh` - write albedo, lightmap, AO and normals (water is lit directly)
+  - `gbuffers_*.fsh` - write the packed G-buffer (`lib/gbuf.glsl`); water is lit directly
   - `deferred.fsh` - lighting: sun/moon direction, sky ambient, torch light
   - `lib/lighting.glsl` - the lighting model (no shadow maps)
-  - `composite.fsh` - atmosphere: haze, sun glow, water/lava fog
-  - `composite1-6.fsh` - bloom prefilter, downsample chain, diffusion source
-  - `final.fsh` - glow compositing, tone, calibration, color mixer, lens, grain
+  - `composite1-3.fsh` - bloom prefilter, two 4x downsamples, diffusion source
+  - `final.fsh` - atmosphere (haze, sun glow, fluid fog), bloom/diffusion mix, grading, lens, grain
 - `scripts/install.sh` - copy the pack into a Prism Launcher instance
 - `tools/glcheck/` - compile every pass with the macOS GLSL compiler
+- `tools/bench/` - time every pass on the GPU (see `BENCHMARK.md`)
 
 ## Workflow
 
 ```sh
 tools/glcheck/run.sh          # compile check (macOS)
+tools/bench/run.sh            # per-pass GPU timing (macOS)
 scripts/install.sh            # install into the "Fabulously Optimized" instance
 scripts/install.sh "Other"    # or another Prism instance
 ```
