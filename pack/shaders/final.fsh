@@ -89,12 +89,20 @@ float filmGrain(vec2 fragCoord) {
 // (lens fringe) without losing the smoothing.
 vec3 fxaa(vec2 uv, vec2 px, out vec3 centre) {
     centre = texture(colortex0, uv).rgb;
-    vec3 nw = texture(colortex0, uv + vec2(-1.0, -1.0) * px).rgb;
-    vec3 ne = texture(colortex0, uv + vec2( 1.0, -1.0) * px).rgb;
-    vec3 sw = texture(colortex0, uv + vec2(-1.0,  1.0) * px).rgb;
-    vec3 se = texture(colortex0, uv + vec2( 1.0,  1.0) * px).rgb;
-    float lM = dot(centre, LUMA), lNW = dot(nw, LUMA), lNE = dot(ne, LUMA);
-    float lSW = dot(sw, LUMA), lSE = dot(se, LUMA);
+#ifdef ENABLE_HAZE
+    // composite stored luma in alpha: corners need one channel only.
+    float lM = dot(centre, LUMA);
+    float lNW = texture(colortex0, uv + vec2(-1.0, -1.0) * px).a;
+    float lNE = texture(colortex0, uv + vec2( 1.0, -1.0) * px).a;
+    float lSW = texture(colortex0, uv + vec2(-1.0,  1.0) * px).a;
+    float lSE = texture(colortex0, uv + vec2( 1.0,  1.0) * px).a;
+#else
+    float lM = dot(centre, LUMA);
+    float lNW = dot(texture(colortex0, uv + vec2(-1.0, -1.0) * px).rgb, LUMA);
+    float lNE = dot(texture(colortex0, uv + vec2( 1.0, -1.0) * px).rgb, LUMA);
+    float lSW = dot(texture(colortex0, uv + vec2(-1.0,  1.0) * px).rgb, LUMA);
+    float lSE = dot(texture(colortex0, uv + vec2( 1.0,  1.0) * px).rgb, LUMA);
+#endif
     float lMin = min(lM, min(min(lNW, lNE), min(lSW, lSE)));
     float lMax = max(lM, max(max(lNW, lNE), max(lSW, lSE)));
     if (lMax - lMin < max(0.04, lMax * 0.125)) return centre;   // not an edge

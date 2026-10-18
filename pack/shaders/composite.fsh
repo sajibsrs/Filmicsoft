@@ -97,5 +97,7 @@ void main() {
 #ifdef ENABLE_HAZE
     scene.rgb = mix(scene.rgb, fogCol, clamp(fogAmt, 0.0, 1.0));
 #endif
-    outColor = scene;
+    // Alpha carries luma for FXAA in final (it reads luma from four corner
+    // neighbours, so one stored value spares four dot products per tap).
+    outColor = vec4(scene.rgb, dot(scene.rgb, vec3(0.2126, 0.7152, 0.0722)));
 }

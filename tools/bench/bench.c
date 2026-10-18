@@ -158,7 +158,7 @@ int main(int argc, char **argv) {
             // layouts (flag/normal channels never zero).
             unsigned r1 = (unsigned)((k + 1) * 2246822519u) >> 24, r2 = (unsigned)((k + 7) * 3266489917u) >> 24;
             unsigned r3 = (unsigned)((k + 13) * 668265263u) >> 24;
-            if (i == 0) { px[k] = 90 + r % 150; px[k+1] = 90 + r1 % 150; px[k+2] = 90 + r2 % 150; px[k+3] = 255; }
+            if (i == 0) { px[k] = 90 + r % 150; px[k+1] = 90 + r1 % 150; px[k+2] = 90 + r2 % 150; px[k+3] = 128 + r3 % 128; }
             else if (i == 1) { px[k] = r1; px[k+1] = r2; px[k+2] = 1 + r3 % 254; px[k+3] = 200 + r % 56; }
             else if (i == 2) { px[k] = r1; px[k+1] = 200 + r2 % 56; px[k+2] = r3; px[k+3] = 255; }
             else { px[k] = r; px[k+1] = r1; px[k+2] = r2; px[k+3] = 255; }
