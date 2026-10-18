@@ -5,6 +5,18 @@ A lightweight, cinematic post-processing shader pack for Minecraft: Java Edition
 fringe and film grain. Written for GLSL 330 so it runs on macOS (OpenGL 4.1),
 Windows and Linux: no compute shaders, no SSBOs.
 
+| Vanilla | Filmicsoft |
+|---|---|
+| ![Vanilla](docs/images/vanilla.jpg) | ![Filmicsoft](docs/images/filmicsoft.jpg) |
+
+## Install
+
+1. Install [Iris](https://modrinth.com/mod/iris) and [Sodium](https://modrinth.com/mod/sodium).
+2. Download `Filmicsoft-<version>.zip` from the
+   [Releases](../../releases) page (or Modrinth) and drop it, unzipped, into
+   `.minecraft/shaderpacks/`.
+3. In game: Video Settings > Shader Packs > Filmicsoft > Apply.
+
 ## Layout
 
 - `pack/shaders/` - the shader pack itself (installed as `Filmicsoft` in `shaderpacks/`)
