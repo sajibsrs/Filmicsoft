@@ -9,6 +9,29 @@ Windows and Linux: no compute shaders, no SSBOs.
 |---|---|
 | ![Vanilla](docs/images/vanilla.jpg) | ![Filmicsoft](docs/images/filmicsoft.jpg) |
 
+## Why Filmicsoft
+
+Realistic Minecraft shaders usually get their look from global illumination,
+ray tracing or path tracing. Those look great but cost a lot of frame time and
+need a strong GPU. Filmicsoft goes the other way: get as close to a realistic,
+filmic image as possible **without GI or ray tracing**, and stay fast.
+
+- **Performance first.** Every pass is measured on the GPU (`tools/bench`, see
+  `BENCHMARK.md`) and kept only if it earns its cost. The whole pack adds about
+  1.2 ms per frame at 1080p on an Apple M4.
+- **Realism from cheap tricks.** Deferred lighting with a soft sun/moon, sky
+  ambient and warm torch light. Vanilla's sky-light level stands in for
+  shadows, and distance haze matches the sky. Then a film look on top: bloom,
+  diffusion, colour grading and grain.
+- **Runs on macOS.** Most shader packs need OpenGL features that macOS doesn't
+  have (it stops at OpenGL 4.1), so they fail to load or render wrong on Macs.
+  Filmicsoft is written for GLSL 330: no compute shaders, no SSBOs. It is
+  built and tested on Apple Silicon, and should work the same on Windows and
+  Linux.
+- **Light on your system.** Small render targets, a packed G-buffer and
+  low-resolution bloom keep memory use and bandwidth low, which also matters
+  on laptops and integrated GPUs.
+
 ## Install
 
 1. Install [Iris](https://modrinth.com/mod/iris) and [Sodium](https://modrinth.com/mod/sodium).
@@ -60,3 +83,7 @@ files, press R in the shader screen (or re-apply) to reload. Check
 Tested: Minecraft 26.1.2, Fabric, Iris 1.11.4, Sodium 0.9.2, macOS (Apple Silicon).
 Not yet tested: Windows, Linux.
 Planned: presets, optional cheap SSAO, light shafts.
+
+## License
+
+MIT, see [LICENSE](LICENSE).
