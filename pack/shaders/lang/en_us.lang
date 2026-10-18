@@ -64,3 +64,10 @@ option.AO_STRENGTH=Ambient Occlusion
 option.HAZE_AMOUNT=Distance Haze
 option.HAZE_SUN_GLOW=Sun Glow in Haze
 option.DEBUG_VIEW=Debug View (0 off, 1 color, 2 AO, 3 normals, 4 light)
+
+screen.EFFECTS=Effects
+option.ENABLE_BLOOM=Bloom
+option.ENABLE_DIFFUSION=Soft Diffusion
+option.ENABLE_HAZE=Atmosphere & Haze
+option.ENABLE_GRAIN=Film Grain
+option.ENABLE_FXAA=Anti-Aliasing (FXAA)

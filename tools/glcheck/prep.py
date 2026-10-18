@@ -5,6 +5,7 @@ Mimics what Iris does before compiling:
   * substitutes option values as plain TEXT (so `-OPTION` with a negative
     value becomes `--0.10`, exactly as it would inside Iris)
   * turns `#version 330 compatibility` into core, which macOS requires
+  * adds the built-in macros Iris defines (MC_RENDER_STAGE_*)
 """
 import re
 import sys
@@ -29,9 +30,13 @@ def substitute_options(text):
     return text
 
 
+# Values don't matter for a compile check, only that the names exist.
+IRIS_MACROS = '\n'.join('#define MC_RENDER_STAGE_%s %d' % (n, i) for i, n in enumerate(
+    ['NONE', 'SKY', 'SUNSET', 'CUSTOM_SKY', 'SUN', 'MOON', 'STARS', 'VOID'])) + '\n'
+
 for f in sorted(root.glob('*.fsh')):
     t = substitute_options(expand(f.read_text()))
-    t = t.replace('#version 330 compatibility', '#version 410 core')
+    t = t.replace('#version 330 compatibility', '#version 410 core\n' + IRIS_MACROS)
     (out / f.name).write_text(t)
 
 

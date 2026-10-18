@@ -28,5 +28,5 @@ void main() {
     // Alpha doubles as AO in the G-buffer; for entities it stays the texture
     // alpha so translucent entity parts still blend.
     outColor = tex;
-    outLight = vec4(clamp(lmcoord, 0.0, 1.0), packNormal(normal));
+    outLight = vec4(packLight(lmcoord, false), packNormal(normal));
 }

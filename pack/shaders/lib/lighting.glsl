@@ -21,7 +21,8 @@ vec3 toGamma(vec3 c) { return pow(max(c, vec3(0.0)), vec3(1.0 / 2.2)); }
 // lm          : x = block light, y = sky light, both 0..1
 // nWS         : surface normal in player/world orientation, normalised
 // ao          : vertex ambient occlusion, 1 = open
-vec3 shadeSurface(vec3 albedoGamma, vec2 lm, vec3 nWS, float ao) {
+// foliage     : 1 for leaves / grass / vines (thin, light scatters through)
+vec3 shadeSurface(vec3 albedoGamma, vec2 lm, vec3 nWS, float ao, float foliage) {
     vec3 albedo = toLinear(albedoGamma);
     float sky = clamp(lm.y, 0.0, 1.0);
     float blk = clamp(lm.x, 0.0, 1.0);
@@ -38,7 +39,13 @@ vec3 shadeSurface(vec3 albedoGamma, vec2 lm, vec3 nWS, float ao) {
     if (hasSkylight) {
         vec3 L = normalize(mat3(gbufferModelViewInverse) * shadowLightPosition);
         float diff = clamp((dot(nWS, L) + 0.2) / 1.2, 0.0, 1.0);    // soft wrap
-        float open = smoothstep(0.86, 0.98, sky);                    // fake shadow
+        // Foliage: a leaf block is a cloud of small cards, not a solid face.
+        // Light it almost evenly from every side, at less than full sun, so
+        // sunlit canopy stops clipping and the shaded side still glows.
+        diff = mix(diff, 0.35 + 0.30 * diff, foliage);
+        // Fake shadow from the sky-light level: open sky is 15, one leaf
+        // layer or an overhang above drops it to 14 (0.935), which is shade.
+        float open = smoothstep(0.92, 0.99, sky);
         vec3 sunCol = mix(vec3(1.00, 0.93, 0.80), vec3(1.00, 0.48, 0.20), warm) * SUN_INTENSITY;
         vec3 moonCol = vec3(0.42, 0.55, 1.00) * 0.10 * MOON_BRIGHTNESS;
         vec3 directCol = mix(moonCol, sunCol, dayAmt) * (1.0 - 0.9 * rain);

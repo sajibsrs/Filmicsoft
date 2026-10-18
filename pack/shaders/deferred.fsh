@@ -25,5 +25,7 @@ void main() {
         outColor = c;
         return;
     }
-    outColor = vec4(shadeSurface(c.rgb, d.rg, unpackNormal(d.ba), c.a), 1.0);
+    float foliage;
+    vec2 lm = unpackLight(d.rg, foliage);
+    outColor = vec4(shadeSurface(c.rgb, lm, unpackNormal(d.ba), c.a, foliage), 1.0);
 }

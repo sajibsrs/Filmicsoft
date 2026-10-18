@@ -12,8 +12,10 @@ Windows and Linux: no compute shaders, no SSBOs.
   - `gbuffers_*.fsh` - write the packed G-buffer (`lib/gbuf.glsl`); water is lit directly
   - `deferred.fsh` - lighting: sun/moon direction, sky ambient, torch light
   - `lib/lighting.glsl` - the lighting model (no shadow maps)
+  - `composite.fsh` - atmosphere (haze, sun glow, fluid fog), before bloom and FXAA
+  - `gbuffers_skybasic.fsh`, `lib/sky.glsl` - sky gradient that fog and clouds fade toward
   - `composite1-3.fsh` - bloom prefilter, two 4x downsamples, diffusion source
-  - `final.fsh` - atmosphere (haze, sun glow, fluid fog), bloom/diffusion mix, grading, lens, grain
+  - `final.fsh` - bloom/diffusion mix, grading, lens, grain
 - `scripts/install.sh` - copy the pack into a Prism Launcher instance
 - `tools/glcheck/` - compile every pass with the macOS GLSL compiler
 - `tools/bench/` - time every pass on the GPU (see `BENCHMARK.md`)

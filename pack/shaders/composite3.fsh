@@ -13,7 +13,8 @@ in vec2 texcoord;
 layout(location = 0) out vec4 outColor;
 
 void main() {
-    vec2 s = vec2(16.0 / viewWidth, 16.0 / viewHeight);  // 2 source texels
+    // Spacing as a fraction of screen height: resolution-independent radius.
+    vec2 s = vec2(0.0148 * viewHeight / viewWidth, 0.0148);
     vec3 sum = texture(colortex5, texcoord).rgb * 4.0;
     sum += texture(colortex5, texcoord + vec2( s.x, 0.0)).rgb * 2.0;
     sum += texture(colortex5, texcoord + vec2(-s.x, 0.0)).rgb * 2.0;

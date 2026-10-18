@@ -22,7 +22,8 @@ static int W, H;
 static GLuint colorTex[MAXTEX], altTex[MAXTEX], depthTex;
 static int texW[MAXTEX], texH[MAXTEX];
 static GLenum texIntFmt[MAXTEX];
-static float texScale[MAXTEX];
+static float texScale[MAXTEX], texScaleY[MAXTEX];
+static int texAbsW[MAXTEX], texAbsH[MAXTEX];   // size.buffer values without a '.' are pixels (as in Iris)
 static GLuint vao, noiseTex;
 
 static const char *VS =
@@ -76,11 +77,14 @@ static GLuint makeTex(int w, int h, GLenum ifmt, GLenum fmt, GLenum type, const 
 }
 
 static void parseProps(const char *path) {
-    for (int i = 0; i < MAXTEX; i++) texScale[i] = 1.0f;
+    for (int i = 0; i < MAXTEX; i++) { texScale[i] = texScaleY[i] = 1.0f; texAbsW[i] = texAbsH[i] = 0; }
     char *s = slurp(path); if (!s) return;
     for (char *line = strtok(s, "\n"); line; line = strtok(NULL, "\n")) {
-        int n; float sx, sy;
-        if (sscanf(line, "size.buffer.colortex%d=%f %f", &n, &sx, &sy) == 3 && n >= 0 && n < MAXTEX) texScale[n] = sx;
+        int n; char xs[32], ys[32];
+        if (sscanf(line, "size.buffer.colortex%d=%31s %31s", &n, xs, ys) == 3 && n >= 0 && n < MAXTEX) {
+            if (strchr(xs, '.')) texScale[n] = (float)atof(xs); else texAbsW[n] = atoi(xs);
+            if (strchr(ys, '.')) texScaleY[n] = (float)atof(ys); else texAbsH[n] = atoi(ys);
+        }
     }
     free(s);
 }
@@ -142,7 +146,8 @@ int main(int argc, char **argv) {
     // Buffers: 0-3 RGBA8 full size, 4-9 RGBA16F at the pack's scales.
     for (int i = 0; i < 11; i++) {
         int half = i >= 4;
-        texW[i] = (int)fmaxf(1, W * texScale[i]); texH[i] = (int)fmaxf(1, H * texScale[i]);
+        texW[i] = texAbsW[i] ? texAbsW[i] : (int)fmaxf(1, W * texScale[i]);
+        texH[i] = texAbsH[i] ? texAbsH[i] : (int)fmaxf(1, H * texScaleY[i]);
         texIntFmt[i] = half ? GL_RGBA16F : GL_RGBA8;
         size_t n = (size_t)texW[i] * texH[i] * 4;
         unsigned char *px = malloc(n);

@@ -18,6 +18,7 @@ in vec2 texcoord;
 in vec2 lmcoord;
 in vec4 glcolor;
 in vec3 normal;
+flat in int foliage;
 
 layout(location = 0) out vec4 outColor;
 layout(location = 1) out vec4 outLight;
@@ -31,7 +32,7 @@ void main() {
     float ao = glcolor.a;
 
     outColor = vec4(tex.rgb * glcolor.rgb, ao);
-    outLight = vec4(lm, packNormal(n));
+    outLight = vec4(packLight(lm, foliage == 1), packNormal(n));
 
 #if DEBUG_VIEW == 1
     outColor = vec4(glcolor.rgb, 1.0);

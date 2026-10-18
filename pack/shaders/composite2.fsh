@@ -6,6 +6,8 @@
 // Nine bilinear taps in a 3x3 tent, spaced two source texels apart, so the
 // whole 6x6 neighbourhood is covered without gaps.
 
+#include "/lib/options.glsl"
+
 /* RENDERTARGETS: 5,9 */
 
 uniform sampler2D colortex4;
@@ -19,7 +21,10 @@ layout(location = 0) out vec4 outColor;
 layout(location = 1) out vec4 outDiffuse;
 
 void main() {
-    vec2 s = vec2(4.0 / viewWidth, 4.0 / viewHeight);   // 2 source texels
+    // Tap spacing is a fraction of screen height (same on-screen blur radius at
+    // any resolution); x is corrected for aspect so the kernel stays square.
+    float aspect = viewHeight / viewWidth;
+    vec2 s = vec2(0.0037 * aspect, 0.0037);
     vec3 sum = texture(colortex4, texcoord).rgb * 4.0;
     sum += texture(colortex4, texcoord + vec2( s.x, 0.0)).rgb * 2.0;
     sum += texture(colortex4, texcoord + vec2(-s.x, 0.0)).rgb * 2.0;
@@ -31,8 +36,9 @@ void main() {
     sum += texture(colortex4, texcoord + vec2(-s.x, -s.y)).rgb;
     outColor = vec4(sum / 16.0, 1.0);
 
-    // Diffusion: same 3x3 tent, but spread 4 half-res texels (8 px) apart.
-    vec2 d = vec2(8.0 / viewWidth, 8.0 / viewHeight);
+#ifdef ENABLE_DIFFUSION
+    // Diffusion: same 3x3 tent, spread twice as wide.
+    vec2 d = vec2(0.0074 * aspect, 0.0074);
     vec3 df = texture(colortex10, texcoord).rgb * 4.0;
     df += texture(colortex10, texcoord + vec2( d.x, 0.0)).rgb * 2.0;
     df += texture(colortex10, texcoord + vec2(-d.x, 0.0)).rgb * 2.0;
@@ -43,4 +49,7 @@ void main() {
     df += texture(colortex10, texcoord + vec2( d.x, -d.y)).rgb;
     df += texture(colortex10, texcoord + vec2(-d.x, -d.y)).rgb;
     outDiffuse = vec4(df / 16.0, 1.0);
+#else
+    outDiffuse = vec4(0.0);
+#endif
 }

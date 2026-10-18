@@ -34,5 +34,9 @@ void main() {
     vec3 c = texture(colortex0, texcoord + ts * vec2( 1.0, -1.0)).rgb;
     vec3 d = texture(colortex0, texcoord + ts * vec2(-1.0, -1.0)).rgb;
     outColor = vec4((brightPart(a) + brightPart(b) + brightPart(c) + brightPart(d)) * 0.25, 1.0);
+#ifdef ENABLE_DIFFUSION
     outScene = vec4((a + b + c + d) * 0.25, 1.0);
+#else
+    outScene = vec4(0.0);
+#endif
 }
