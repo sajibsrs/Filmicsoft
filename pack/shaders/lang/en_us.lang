@@ -52,3 +52,15 @@ option.CHROMA_FRINGE=Chromatic Fringe
 option.GRAIN_AMOUNT=Grain Amount
 option.GRAIN_SIZE=Grain Size
 option.GRAIN_SPEED=Grain Speed (changes/sec)
+
+screen.LIGHT=Lighting
+screen.ATMOS=Atmosphere
+screen.DEBUG_PAGE=Debug
+option.SUN_INTENSITY=Sun Strength
+option.AMBIENT_INTENSITY=Sky Ambient
+option.BLOCKLIGHT_INTENSITY=Torch Light
+option.MOON_BRIGHTNESS=Moon / Night Brightness
+option.AO_STRENGTH=Ambient Occlusion
+option.HAZE_AMOUNT=Distance Haze
+option.HAZE_SUN_GLOW=Sun Glow in Haze
+option.DEBUG_VIEW=Debug View (0 off, 1 color, 2 AO, 3 normals, 4 light)

@@ -9,7 +9,11 @@ Windows and Linux: no compute shaders, no SSBOs.
 
 - `pack/shaders/` - the shader pack itself (installed as `Filmicsoft` in `shaderpacks/`)
   - `lib/options.glsl` - every user option, shared by all passes
-  - `composite*.fsh` - bloom prefilter, downsample chain, diffusion source
+  - `gbuffers_*.fsh` - write albedo, lightmap, AO and normals (water is lit directly)
+  - `deferred.fsh` - lighting: sun/moon direction, sky ambient, torch light
+  - `lib/lighting.glsl` - the lighting model (no shadow maps)
+  - `composite.fsh` - atmosphere: haze, sun glow, water/lava fog
+  - `composite1-6.fsh` - bloom prefilter, downsample chain, diffusion source
   - `final.fsh` - glow compositing, tone, calibration, color mixer, lens, grain
 - `scripts/install.sh` - copy the pack into a Prism Launcher instance
 - `tools/glcheck/` - compile every pass with the macOS GLSL compiler
@@ -40,4 +44,4 @@ files, press R in the shader screen (or re-apply) to reload. Check
 
 Tested: Minecraft 26.1.2, Fabric, Iris 1.11.4, Sodium 0.9.2, macOS (Apple Silicon).
 Not yet tested: Windows, Linux.
-Planned: global lighting (gbuffers), presets, optional cheap AO.
+Planned: presets, optional cheap SSAO, light shafts.
