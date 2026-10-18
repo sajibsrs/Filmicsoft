@@ -14,7 +14,6 @@
 /* RENDERTARGETS: 0 */
 
 uniform sampler2D colortex0;
-uniform sampler2D colortex1;
 uniform sampler2D depthtex0;
 uniform mat4 gbufferProjectionInverse;
 uniform mat4 gbufferModelViewInverse;
@@ -46,9 +45,10 @@ void main() {
     vec3 dir = viewPos / max(dist, 0.0001);
 
     bool isSky = depth >= 1.0;
-    // gbuffers_clouds tags its pixels with colortex1 = (0, 0, 1, 0).
-    vec4 tag = texture(colortex1, texcoord);
-    bool isCloud = tag.b > 0.5 && tag.a <= 0.0;
+    // Clouds leave colortex0 alpha at 0 (see blend.gbuffers_clouds in
+    // shaders.properties); everything deferred lit has alpha 1, and water
+    // blended over a cloud only raises it to the water's own alpha.
+    bool isCloud = scene.a < 0.5;
 
     // How much sky the camera can see (caves -> 0). Dimensions without sky
     // (Nether, End) keep their fog color at full strength.

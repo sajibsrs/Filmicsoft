@@ -27,9 +27,9 @@ static int texAbsW[MAXTEX], texAbsH[MAXTEX];   // size.buffer values without a '
 static GLuint vao, noiseTex;
 
 static const char *VS =
-    "#version 410 core\nout vec2 texcoord;out vec2 lmcoord;out vec4 glcolor;out vec3 normal;\n"
+    "#version 410 core\nout vec2 texcoord;out vec2 lmcoord;out vec4 glcolor;out vec3 normal;flat out int foliage;\n"
     "void main(){vec2 p=vec2((gl_VertexID<<1)&2, gl_VertexID&2);"
-    "texcoord=p; lmcoord=vec2(0.8,0.9); glcolor=vec4(1.0,1.0,1.0,0.9); normal=vec3(0.0,1.0,0.0);"
+    "texcoord=p; lmcoord=vec2(0.8,0.9); glcolor=vec4(1.0,1.0,1.0,0.9); normal=vec3(0.0,1.0,0.0);foliage=0;"
     "gl_Position=vec4(p*2.0-1.0,0.0,1.0);}\n";
 
 static const char *COPY_FS =

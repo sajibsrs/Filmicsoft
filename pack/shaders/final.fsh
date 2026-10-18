@@ -9,12 +9,18 @@
 
 // Bloom buffers are stored in half float so dim glow doesn't band. These
 // must live inside a comment: Iris reads them from the source text, and
-// RGBA16F is not a real GLSL identifier.
+// RGBA16F is not a real GLSL identifier. The bloom buffers are fully
+// rewritten every frame, so Iris need not clear them first.
 /*
 const int colortex4Format = RGBA16F;
 const int colortex5Format = RGBA16F;
 const int colortex6Format = RGBA16F;
 const int colortex9Format = RGBA16F;
+const bool colortex4Clear = false;
+const bool colortex5Clear = false;
+const bool colortex6Clear = false;
+const bool colortex9Clear = false;
+const bool colortex10Clear = false;
 */
 
 uniform sampler2D noisetex;      // Iris built-in 256x256 white noise
@@ -70,8 +76,10 @@ float filmGrain(vec2 fragCoord) {
     float step24 = mod(floor(frameTimeCounter * float(GRAIN_SPEED)), 997.0);
     vec2 offset = vec2(hash12(vec2(step24, 1.7)), hash12(vec2(2.3, step24))) * 256.0;
     vec2 p = fragCoord / cell + offset;
-    float n = valueNoise(p) * 0.75 + valueNoise(p * 1.6 + vec2(17.0, 5.0)) * 0.25;
-    return (n - 0.5) * 3.6;
+    // One layer instead of two: the 0.25-weight fine layer was barely
+    // visible. Scaled by 0.8 to keep the old layered strength.
+    float n = valueNoise(p);
+    return (n - 0.5) * 2.85;
 }
 
 #ifdef ENABLE_FXAA
