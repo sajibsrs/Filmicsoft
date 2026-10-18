@@ -59,7 +59,7 @@
 #define GRAIN_SPEED 16           // [0 6 10 16 24 36]  pattern changes per second (0 = still)
 
 // ---- Lighting (deferred, no shadow maps) -----------------------------------
-#define SUN_INTENSITY 1.00       // [0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.10 1.20 1.35 1.50 1.75 2.00]
+#define SUN_INTENSITY 1.50      // [0.40 0.50 0.60 0.70 0.80 0.90 1.00 1.10 1.20 1.35 1.50 1.75 2.00]
 #define AMBIENT_INTENSITY 0.90   // [0.60 0.80 0.90 1.00 1.10 1.25 1.50]
 #define BLOCKLIGHT_INTENSITY 1.00 // [0.50 0.75 1.00 1.25 1.50]
 #define MOON_BRIGHTNESS 1.00     // [0.50 0.75 1.00 1.50 2.00]
