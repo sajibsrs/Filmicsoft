@@ -7,8 +7,8 @@
 #define SATURATION 1.10          // [0.60 0.70 0.80 0.90 0.95 1.00 1.05 1.10 1.15 1.20 1.30]
 #define VIBRANCE 0.20            // [0.00 0.05 0.10 0.20 0.30 0.40]
 #define CHROMA_LIMIT 0.85        // [0.50 0.60 0.70 0.75 0.80 0.85 0.90 1.00]
-#define SHADOW_TINT 0.35         // [0.00 0.15 0.25 0.35 0.50 0.75 1.00]
-#define HIGHLIGHT_TINT 0.35      // [0.00 0.15 0.25 0.35 0.50 0.75 1.00]
+#define SHADOW_TINT 0.50         // [0.00 0.15 0.25 0.35 0.50 0.75 1.00]
+#define HIGHLIGHT_TINT 0.50      // [0.00 0.15 0.25 0.35 0.50 0.75 1.00]
 
 // ---- Calibration (Lightroom-style primary shifts) --------------------------
 // Red:   + toward orange, - toward magenta

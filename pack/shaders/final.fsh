@@ -283,12 +283,12 @@ void main() {
     hsv.y = softLimit(hsv.y, CHROMA_LIMIT);
     col = hsv2rgb(hsv);
 
-    // Split toning: cool/teal shadows, warm highlights.
+    // Split toning: cyan shadows, orange highlights.
     float luma = dot(col, LUMA);
     float shadowMask = 1.0 - smoothstep(0.0, 0.5, luma);
     float highlightMask = smoothstep(0.5, 1.0, luma);
-    col += vec3(-0.020, 0.012, 0.030) * SHADOW_TINT * shadowMask;
-    col += vec3(0.030, 0.014, -0.025) * HIGHLIGHT_TINT * highlightMask;
+    col += vec3(-0.030, 0.022, 0.030) * SHADOW_TINT * shadowMask;
+    col += vec3(0.040, 0.018, -0.035) * HIGHLIGHT_TINT * highlightMask;
 
     // Global saturation.
     luma = dot(col, LUMA);
