@@ -1,0 +1,54 @@
+screen.GRADE=Color Grading
+screen.MIXER=Color Mixer (HSL)
+screen.CALIB=Calibration (RGB primaries)
+screen.GLOW=Glow
+screen.LENS=Lens
+screen.GRAIN_PAGE=Film Grain
+
+option.EXPOSURE=Exposure
+option.CONTRAST=Contrast
+option.BLACK_LIFT=Black Lift
+option.SATURATION=Saturation
+option.VIBRANCE=Vibrance
+option.CHROMA_LIMIT=Color Intensity Limit
+option.SHADOW_TINT=Shadow Tint (teal)
+option.HIGHLIGHT_TINT=Highlight Tint (warm)
+
+option.CAL_RED=Red Primary
+option.CAL_GREEN=Green Primary
+option.CAL_BLUE=Blue Primary
+
+option.RED_H=Red Hue
+option.RED_S=Red Saturation
+option.RED_L=Red Luminance
+option.ORANGE_H=Orange Hue
+option.ORANGE_S=Orange Saturation
+option.ORANGE_L=Orange Luminance
+option.YELLOW_H=Yellow Hue
+option.YELLOW_S=Yellow Saturation
+option.YELLOW_L=Yellow Luminance
+option.GREEN_H=Green Hue
+option.GREEN_S=Green Saturation
+option.GREEN_L=Green Luminance
+option.AQUA_H=Aqua Hue
+option.AQUA_S=Aqua Saturation
+option.AQUA_L=Aqua Luminance
+option.BLUE_H=Blue Hue
+option.BLUE_S=Blue Saturation
+option.BLUE_L=Blue Luminance
+option.PURPLE_H=Purple Hue
+option.PURPLE_S=Purple Saturation
+option.PURPLE_L=Purple Luminance
+option.MAGENTA_H=Magenta Hue
+option.MAGENTA_S=Magenta Saturation
+option.MAGENTA_L=Magenta Luminance
+
+option.BLOOM_STRENGTH=Bloom Strength
+option.BLOOM_THRESHOLD=Bloom Threshold
+option.DIFFUSION=Soft Diffusion
+
+option.VIGNETTE=Vignette
+option.CHROMA_FRINGE=Chromatic Fringe
+option.GRAIN_AMOUNT=Grain Amount
+option.GRAIN_SIZE=Grain Size
+option.GRAIN_SPEED=Grain Speed (changes/sec)
