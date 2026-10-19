@@ -51,7 +51,7 @@ filmic image as possible **without GI or ray tracing**, and stay fast.
   - `gbuffers_skybasic.fsh`, `lib/sky.glsl` - sky gradient that fog and clouds fade toward
   - `composite1-3.fsh` - bloom prefilter, two 4x downsamples, diffusion source
   - `final.fsh` - bloom/diffusion mix, grading, lens, grain
-- `scripts/install.sh` - copy the pack into a Prism Launcher instance
+- `scripts/install.sh` - copy the pack into a game directory's `shaderpacks/`
 - `tools/glcheck/` - compile every pass with the macOS GLSL compiler
 - `tools/bench/` - time every pass on the GPU (see `BENCHMARK.md`)
 
@@ -60,13 +60,13 @@ filmic image as possible **without GI or ray tracing**, and stay fast.
 ```sh
 tools/glcheck/run.sh          # compile check (macOS)
 tools/bench/run.sh            # per-pass GPU timing (macOS)
-scripts/install.sh            # install into the "Fabulously Optimized" instance
-scripts/install.sh "Other"    # or another Prism instance
+scripts/install.sh            # install into the default game directory
+scripts/install.sh "/path/to/.minecraft"   # or another one (also: MINECRAFT_DIR)
 ```
 
 Then in game: Video Settings > Shader Packs > Filmicsoft > Apply. After editing
 files, press R in the shader screen (or re-apply) to reload. Check
-`<instance>/minecraft/logs/latest.log` if the pack reports a failed load.
+`<game dir>/logs/latest.log` if the pack reports a failed load.
 
 ## Gotchas learned
 
@@ -80,7 +80,7 @@ files, press R in the shader screen (or re-apply) to reload. Check
 
 ## Status
 
-Tested: Minecraft 26.1.2, Fabric, Iris 1.11.4, Sodium 0.9.2, macOS (Apple Silicon).
+Tested: Minecraft 26.3, Fabric, Iris 1.11.7, Sodium 0.9.2, macOS (Apple Silicon).
 Not yet tested: Windows, Linux.
 Planned: presets, optional cheap SSAO, light shafts.
 
