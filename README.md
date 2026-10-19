@@ -7,7 +7,9 @@ Windows and Linux: no compute shaders, no SSBOs.
 
 | Vanilla | Filmicsoft |
 |---|---|
-| ![Vanilla](docs/images/vanilla.jpg) | ![Filmicsoft](docs/images/filmicsoft.jpg) |
+| ![Village, vanilla](docs/images/village-vanilla.webp) | ![Village, Filmicsoft](docs/images/village-filmicsoft.webp) |
+| ![Jungle, vanilla](docs/images/jungle-vanilla.webp) | ![Jungle, Filmicsoft](docs/images/jungle-filmicsoft.webp) |
+| ![Desert, vanilla](docs/images/desert-vanilla.webp) | ![Desert, Filmicsoft](docs/images/desert-filmicsoft.webp) |
 
 ## Why Filmicsoft
 
