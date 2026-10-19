@@ -25,8 +25,8 @@ void main() {
     if (tex.a < alphaTestRef) discard;
     tex.rgb = mix(tex.rgb, entityColor.rgb, entityColor.a);
 
-    // Alpha doubles as AO in the G-buffer; for entities it stays the texture
-    // alpha so translucent entity parts still blend.
-    outColor = tex;
+    // Alpha doubles as AO in the G-buffer. The hand is solid, so keep it at 1:
+    // any alpha below 1 here lets the terrain behind it show through.
+    outColor = vec4(tex.rgb, 1.0);
     outLight = vec4(packLight(lmcoord, false), packNormal(normal));
 }
