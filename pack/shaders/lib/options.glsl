@@ -61,7 +61,7 @@
 #define CHROMA_FRINGE 0.05       // [0.00 0.05 0.10 0.15 0.25 0.40]
 
 // ---- Grain (size is relative to a 1080p screen so Retina looks the same) ---
-#define GRAIN_AMOUNT 0.008       // [0.000 0.005 0.008 0.010 0.015 0.020 0.025 0.035 0.050 0.070 0.100]
+#define GRAIN_AMOUNT 0.0075       // [0.000 0.0025 0.005 0.0075 0.010 0.025 0.05 0.1]
 #define GRAIN_SIZE 4.0           // [1.0 1.5 2.2 3.0 4.0 5.0 6.0 8.0 10.0]
 #define GRAIN_SPEED 24           // [0 6 10 16 24 36]  pattern changes per second (0 = still)
 
