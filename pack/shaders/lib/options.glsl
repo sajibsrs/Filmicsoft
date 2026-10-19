@@ -76,6 +76,7 @@
 
 // ---- Atmosphere ------------------------------------------------------------
 #define HAZE_AMOUNT 0.50         // [0.00 0.50 1.00 1.50 2.00]
+#define CLOUD_DISTANCE 5.0       // [2.0 3.0 4.0 5.0 6.0 8.0]  cloud fade length, in render distances (higher = clouds reach the horizon)
 #define HAZE_SUN_GLOW 0.50       // [0.00 0.25 0.50 0.75 1.00]
 
 // ---- Debug (terrain only): 1 vertex color, 2 AO, 3 normals, 4 lightmap ----
