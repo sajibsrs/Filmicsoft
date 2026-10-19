@@ -60,6 +60,7 @@ option.SUN_INTENSITY=Sun Strength
 option.AMBIENT_INTENSITY=Sky Ambient
 option.BLOCKLIGHT_INTENSITY=Torch Light
 option.MOON_BRIGHTNESS=Moon / Night Brightness
+option.HIGHLIGHT_KNEE=Highlight Rolloff Start
 option.AO_STRENGTH=Ambient Occlusion
 option.HAZE_AMOUNT=Distance Haze
 option.HAZE_SUN_GLOW=Sun Glow in Haze

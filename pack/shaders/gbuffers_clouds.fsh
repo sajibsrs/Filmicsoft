@@ -13,6 +13,7 @@ uniform vec3 skyColor;
 uniform vec3 fogColor;
 uniform vec3 upPosition;
 uniform float far;
+uniform mat4 gbufferModelViewInverse;
 
 #include "/lib/sky.glsl"
 
@@ -27,8 +28,11 @@ void main() {
     vec4 c = texture(gtexture, texcoord) * glcolor;
 
     // Clouds reach well past the terrain render distance, so fade over 2x far.
+    // Horizontal distance only: clouds sit far above the camera, so straight-line
+    // distance would half-fade even a cloud directly overhead.
     float dist = length(viewPos);
-    float t = clamp(dist / (max(far, 64.0) * 2.0), 0.0, 1.0);
+    vec3 playerPos = mat3(gbufferModelViewInverse) * viewPos;
+    float t = clamp(length(playerPos.xz) / (max(far, 64.0) * 2.0), 0.0, 1.0);
 
     // Melt into the sky color behind the cloud, then into transparency, so
     // far cloud boxes dissolve instead of showing as pale flat blocks.

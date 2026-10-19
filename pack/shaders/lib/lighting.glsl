@@ -17,6 +17,19 @@ const vec3 LIGHT_LUMA = vec3(0.2126, 0.7152, 0.0722);
 vec3 toLinear(vec3 c) { return pow(max(c, vec3(0.0)), vec3(2.2)); }
 vec3 toGamma(vec3 c) { return pow(max(c, vec3(0.0)), vec3(1.0 / 2.2)); }
 
+// Highlight shoulder on linear light. Identity below HIGHLIGHT_KNEE, then an
+// exponential ease toward 1.0, so a bright sun can light pale surfaces (sand,
+// snow, birch) without clipping them to flat white. Scaled by the brightest
+// channel so hue is kept; per-channel clipping is what turned sand grey-green.
+vec3 rolloff(vec3 c) {
+    float k = HIGHLIGHT_KNEE;
+    float m = max(max(c.r, c.g), c.b);
+    if (m <= k) return c;
+    float r = 1.0 - k;
+    float mapped = k + r * (1.0 - exp(-(m - k) / r));
+    return c * (mapped / m);
+}
+
 // albedoGamma : texture color (display space)
 // lm          : x = block light, y = sky light, both 0..1
 // nWS         : surface normal in player/world orientation, normalised
@@ -77,5 +90,5 @@ vec3 shadeSurface(vec3 albedoGamma, vec2 lm, vec3 nWS, float ao, float foliage) 
         floorLight = mix(vec3(1.0), tint, 0.6) * 0.11;
     }
 
-    return toGamma(albedo * (direct + ambient + block + floorLight));
+    return toGamma(rolloff(albedo * (direct + ambient + block + floorLight)));
 }
