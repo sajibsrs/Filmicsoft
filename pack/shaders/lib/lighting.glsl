@@ -35,7 +35,8 @@ vec3 rolloff(vec3 c) {
 // nWS         : surface normal in player/world orientation, normalised
 // ao          : vertex ambient occlusion, 1 = open
 // foliage     : 1 for leaves / grass / vines (thin, light scatters through)
-vec3 shadeSurface(vec3 albedoGamma, vec2 lm, vec3 nWS, float ao, float foliage) {
+// emissive    : 1 for light sources (lava, glowstone...): adds their own colour
+vec3 shadeSurface(vec3 albedoGamma, vec2 lm, vec3 nWS, float ao, float foliage, float emissive) {
     vec3 albedo = toLinear(albedoGamma);
     float sky = clamp(lm.y, 0.0, 1.0);
     float blk = clamp(lm.x, 0.0, 1.0);
@@ -90,5 +91,8 @@ vec3 shadeSurface(vec3 albedoGamma, vec2 lm, vec3 nWS, float ao, float foliage) 
         floorLight = mix(vec3(1.0), tint, 0.6) * 0.11;
     }
 
-    return toGamma(rolloff(albedo * (direct + ambient + block + floorLight)));
+    // ---- Self-emission: a light source shows its own colour, shade or not --
+    vec3 glow = albedo * emissive * EMISSIVE_GLOW;
+
+    return toGamma(rolloff(albedo * (direct + ambient + block + floorLight) + glow));
 }

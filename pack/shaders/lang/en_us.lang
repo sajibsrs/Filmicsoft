@@ -59,6 +59,7 @@ screen.DEBUG_PAGE=Debug
 option.SUN_INTENSITY=Sun Strength
 option.AMBIENT_INTENSITY=Sky Ambient
 option.BLOCKLIGHT_INTENSITY=Torch Light
+option.EMISSIVE_GLOW=Emissive Glow (lava, glowstone)
 option.MOON_BRIGHTNESS=Moon / Night Brightness
 option.HIGHLIGHT_KNEE=Highlight Rolloff Start
 option.AO_STRENGTH=Ambient Occlusion

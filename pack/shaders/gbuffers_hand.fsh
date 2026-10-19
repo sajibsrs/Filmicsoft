@@ -28,5 +28,5 @@ void main() {
     // Alpha doubles as AO in the G-buffer. The hand is solid, so keep it at 1:
     // any alpha below 1 here lets the terrain behind it show through.
     outColor = vec4(tex.rgb, 1.0);
-    outLight = vec4(packLight(lmcoord, false), packNormal(normal));
+    outLight = vec4(packLight(lmcoord, 0.0), packNormal(normal));
 }
