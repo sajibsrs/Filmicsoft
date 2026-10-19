@@ -17,12 +17,14 @@ need a strong GPU. Filmicsoft goes the other way: get as close to a realistic,
 filmic image as possible **without GI or ray tracing**, and stay fast.
 
 - **Performance first.** Every pass is measured on the GPU (`tools/bench`, see
-  `BENCHMARK.md`) and kept only if it earns its cost. The whole pack adds about
-  1.2 ms per frame at 1080p on an Apple M4.
+  `BENCHMARK.md`) and kept only if it earns its cost. The post-processing chain
+  adds about 1.2 ms per frame at 1080p on an Apple M4; the shadow map is extra
+  and can be turned off or made cheaper (see Options).
 - **Realism from cheap tricks.** Deferred lighting with a soft sun/moon, sky
-  ambient and warm torch light. Vanilla's sky-light level stands in for
-  shadows, and distance haze matches the sky. Then a film look on top: bloom,
-  diffusion, colour grading and grain.
+  ambient and warm torch light, and a real filtered shadow map for the sun and
+  moon (with a sky-light fake as the fallback when it is off or out of range).
+  Distance haze matches the sky. Then a film look on top: bloom, diffusion,
+  colour grading and grain.
 - **Runs on macOS.** Most shader packs need OpenGL features that macOS doesn't
   have (it stops at OpenGL 4.1), so they fail to load or render wrong on Macs.
   Filmicsoft is written for GLSL 330: no compute shaders, no SSBOs. It is
@@ -32,12 +34,24 @@ filmic image as possible **without GI or ray tracing**, and stay fast.
   low-resolution bloom keep memory use and bandwidth low, which also matters
   on laptops and integrated GPUs.
 
+## What's new in 2.0.0
+
+- **Real shadows, on by default.** A shadow map with soft, filtered edges.
+  Distance, resolution, filter quality, softness and whether mobs cast shadows
+  are all options. Turn `ENABLE_SHADOWS` off for the cheap sky-light version.
+- **Emissive glow per texel.** Lantern glass, flames and lava glow; the dark
+  metal frame of a lantern or the stick of a torch no longer does.
+- **Highlight rolloff and retuned light.** Sun 1.50 and ambient 1.10 keep sand,
+  snow and other pale blocks textured instead of blowing out to flat cream.
+- **Fewer fullscreen passes** (two bloom passes instead of three).
+- **Cloud Distance slider.**
+
 ## Install
 
 1. Install [Iris](https://modrinth.com/mod/iris) and [Sodium](https://modrinth.com/mod/sodium).
 2. Download `Filmicsoft-<version>.zip` from the
-   [Releases](../../releases) page (or Modrinth) and drop it, unzipped, into
-   `.minecraft/shaderpacks/`.
+   [Releases](../../releases) page (or Modrinth) and drop it into
+   `.minecraft/shaderpacks/`. (A zip works as is; no need to unzip it.)
 3. In game: Video Settings > Shader Packs > Filmicsoft > Apply.
 
 ## Layout
@@ -46,10 +60,11 @@ filmic image as possible **without GI or ray tracing**, and stay fast.
   - `lib/options.glsl` - every user option, shared by all passes
   - `gbuffers_*.fsh` - write the packed G-buffer (`lib/gbuf.glsl`); water is lit directly
   - `deferred.fsh` - lighting: sun/moon direction, sky ambient, torch light
-  - `lib/lighting.glsl` - the lighting model (sky-light fake shadow, plus the optional shadow map)
+  - `shadow.fsh`, `shadow.vsh` - the shadow map pass
+  - `lib/lighting.glsl` - the lighting model (shadow map lookups, sky-light fake as fallback, highlight rolloff, emissive glow)
   - `lib/fog.glsl` - atmosphere (haze, sun glow, fluid fog), applied in `deferred.fsh` and `gbuffers_water.fsh`
   - `gbuffers_skybasic.fsh`, `lib/sky.glsl` - sky gradient that fog and clouds fade toward
-  - `composite1-3.fsh` - bloom prefilter, two 4x downsamples, diffusion source
+  - `composite1-2.fsh` - bloom prefilter and downsample, diffusion source
   - `final.fsh` - bloom/diffusion mix, grading, lens, grain
 - `scripts/install.sh` - copy the pack into a game directory's `shaderpacks/`
 - `tools/glcheck/` - compile every pass with the macOS GLSL compiler
@@ -80,7 +95,8 @@ files, press R in the shader screen (or re-apply) to reload. Check
 
 ## Status
 
-Tested: Minecraft 26.3, Fabric, Iris 1.11.7, Sodium 0.9.2, macOS (Apple Silicon).
+Tested: Minecraft 26.3, Fabric, Iris 1.11.7, Sodium 0.9.2, macOS (Apple Silicon),
+on the official launcher through Prism.
 Not yet tested: Windows, Linux.
 Planned: presets, optional cheap SSAO, light shafts.
 
