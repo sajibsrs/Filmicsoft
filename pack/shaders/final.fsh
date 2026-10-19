@@ -14,11 +14,9 @@
 /*
 const int colortex4Format = RGBA16F;
 const int colortex5Format = RGBA16F;
-const int colortex6Format = RGBA16F;
 const int colortex9Format = RGBA16F;
 const bool colortex4Clear = false;
 const bool colortex5Clear = false;
-const bool colortex6Clear = false;
 const bool colortex9Clear = false;
 const bool colortex10Clear = false;
 */
@@ -27,7 +25,6 @@ uniform sampler2D noisetex;      // Iris built-in 256x256 white noise
 uniform sampler2D colortex0;
 uniform sampler2D colortex4;
 uniform sampler2D colortex5;
-uniform sampler2D colortex6;
 uniform sampler2D colortex9;
 uniform float viewWidth;
 uniform float viewHeight;
@@ -89,20 +86,11 @@ float filmGrain(vec2 fragCoord) {
 // (lens fringe) without losing the smoothing.
 vec3 fxaa(vec2 uv, vec2 px, out vec3 centre) {
     centre = texture(colortex0, uv).rgb;
-#ifdef ENABLE_HAZE
-    // composite stored luma in alpha: corners need one channel only.
-    float lM = dot(centre, LUMA);
-    float lNW = texture(colortex0, uv + vec2(-1.0, -1.0) * px).a;
-    float lNE = texture(colortex0, uv + vec2( 1.0, -1.0) * px).a;
-    float lSW = texture(colortex0, uv + vec2(-1.0,  1.0) * px).a;
-    float lSE = texture(colortex0, uv + vec2( 1.0,  1.0) * px).a;
-#else
     float lM = dot(centre, LUMA);
     float lNW = dot(texture(colortex0, uv + vec2(-1.0, -1.0) * px).rgb, LUMA);
     float lNE = dot(texture(colortex0, uv + vec2( 1.0, -1.0) * px).rgb, LUMA);
     float lSW = dot(texture(colortex0, uv + vec2(-1.0,  1.0) * px).rgb, LUMA);
     float lSE = dot(texture(colortex0, uv + vec2( 1.0,  1.0) * px).rgb, LUMA);
-#endif
     float lMin = min(lM, min(min(lNW, lNE), min(lSW, lSE)));
     float lMax = max(lM, max(max(lNW, lNE), max(lSW, lSE)));
     if (lMax - lMin < max(0.04, lMax * 0.125)) return centre;   // not an edge
@@ -129,11 +117,6 @@ vec3 tap4(sampler2D tex, vec2 uv, vec2 texel) {
     s     += texture(tex, uv + texel * vec2( 0.5, -0.5)).rgb;
     s     += texture(tex, uv + texel * vec2(-0.5, -0.5)).rgb;
     return s * 0.25;
-}
-
-vec3 tap2(sampler2D tex, vec2 uv, vec2 texel) {
-    return (texture(tex, uv + texel * vec2( 0.5,  0.5)).rgb +
-            texture(tex, uv + texel * vec2(-0.5, -0.5)).rgb) * 0.5;
 }
 
 // ---------------------------------------------------------------------------
@@ -165,11 +148,10 @@ void main() {
     col = mix(col, diffuse, DIFFUSION);
 #endif
 
-    // Bloom: weighted sum of three levels (1/2, 1/8, 1/32 res).
+    // Bloom: weighted sum of two levels (1/2 and 1/8 res, the wide one tapped with a wide spread).
 #ifdef ENABLE_BLOOM
     vec3 bloom = tap4(colortex4, uv, px * 2.0) * 0.30;
-    bloom     += tap2(colortex5, uv, px * 8.0) * 0.40;
-    bloom     += texture(colortex6, uv).rgb * 0.30;
+    bloom     += tap4(colortex5, uv, px * 24.0) * 0.70;
     col += bloom * BLOOM_STRENGTH;
 #endif
 

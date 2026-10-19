@@ -1,12 +1,12 @@
 // Filmicsoft shared options. Included by every pass so values stay in sync.
 
 // ---- Effects on/off (a disabled effect costs nothing: code and passes are removed)
-#define ENABLE_BLOOM             // Glow around bright lights (3 extra passes)
+#define ENABLE_BLOOM             // Glow around bright lights (2 extra passes)
 #define ENABLE_DIFFUSION         // Soft pro-mist haze (shares the bloom passes)
 #define ENABLE_HAZE              // Distance haze, sun glow, water/lava fog
 #define ENABLE_GRAIN             // Film grain
 #define ENABLE_FXAA              // Edge anti-aliasing (FXAA, one extra texture neighbourhood)
-//#define ENABLE_SHADOWS         // Real sun/moon shadow map (extra geometry pass + filtered lookups; off = sky-light fake shadow)
+#define ENABLE_SHADOWS           // Real sun/moon shadow map (extra geometry pass + filtered lookups; off = sky-light fake shadow)
 
 // ---- Grading ---------------------------------------------------------------
 #define EXPOSURE 1.00            // [0.50 0.60 0.70 0.80 0.90 1.00 1.10 1.20 1.30 1.40 1.50]
@@ -15,8 +15,8 @@
 #define SATURATION 1.00          // [0.00 0.25 0.50 0.60 0.70 0.80 0.90 1.00 1.10 1.20 1.30 1.50 1.75 2.00]
 #define VIBRANCE 0.40            // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00]
 #define CHROMA_LIMIT 1.00        // [0.00 0.25 0.50 0.70 0.80 0.90 1.00]
-#define SHADOW_TINT 0.10         // [0.00 0.10 0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00]
-#define HIGHLIGHT_TINT 0.25      // [0.00 0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00]
+#define SHADOW_TINT 0.10         // [0.00 0.10 0.25 0.50 0.75 1.00]
+#define HIGHLIGHT_TINT 0.25      // [0.00 0.10 0.25 0.50 0.75 1.00]
 
 // ---- Calibration (Lightroom-style primary shifts) --------------------------
 // Red:   + toward orange, - toward magenta
@@ -78,11 +78,11 @@
 // ---- Shadows (only used when ENABLE_SHADOWS is on) -------------------------
 // Map covers SHADOW_DISTANCE blocks around the player; beyond it the sky-light
 // fake shadow takes over (cross-faded). Texel size = 2 * distance / resolution.
-#define SHADOW_DISTANCE 36       // [16 24 36 48 64]  blocks
-#define SHADOW_RESOLUTION 1024   // [512 1024 2048]
+#define SHADOW_DISTANCE 64       // [16 24 36 48 64 128]  blocks
+#define SHADOW_RESOLUTION 1024   // [256 512 1024 2048]
 #define SHADOW_FILTER 1          // [0 1 2 3]  edge quality: 0 hardware 2x2 only, 1 = 4 taps, 2 = 8 taps, 3 = 16 taps
 #define SHADOW_SOFTNESS 1.5      // [0.5 1.0 1.5 2.0 3.0]  blur radius of the shadow edge, in shadow-map texels
-//#define SHADOW_ENTITIES        // Mobs and items cast shadows too (every entity is drawn a second time: costs CPU)
+#define SHADOW_ENTITIES          // Mobs and items cast shadows too (every entity is drawn a second time: costs CPU)
 
 // ---- Atmosphere ------------------------------------------------------------
 #define HAZE_AMOUNT 0.50         // [0.00 0.50 1.00 1.50 2.00]

@@ -19,7 +19,7 @@ OPTION = re.compile(r'^#define\s+([A-Za-z_]\w*)\s+(\S+)\s*//\s*\[', re.M)
 
 
 def expand(text):
-    return re.sub(r'#include\s+"/([^"]+)"', lambda m: (root / m.group(1)).read_text(), text)
+    return re.sub(r'#include\s+"/([^"]+)"', lambda m: expand((root / m.group(1)).read_text()), text)
 
 
 def substitute_options(text):

@@ -1,54 +1,28 @@
-#version 330 compatibility
-
 // Atmosphere: distance haze toward the sky color, a warm glow toward the sun,
 // and the water / lava / blindness fog vanilla would normally draw.
-// Its own pass, before bloom and FXAA: fog depends on per-pixel depth, so
-// applying it after FXAA leaves edge pixels (half tree, half sky, sky depth)
-// unfogged, which shows as a dark outline around every fogged object.
+// Applied where each surface is shaded (deferred for everything opaque and the
+// sky, gbuffers_water for translucents), so no separate full-screen pass reads
+// and rewrites the scene. Include after lib/options.glsl and lib/lighting.glsl
+// (which declare sunAngle, rainStrength, hasSkylight, fogColor,
+// gbufferModelViewInverse).
+// The #ifdef ENABLE_HAZE in applyAtmosphere keeps the menu toggle listed.
 
-#include "/lib/options.glsl"
-// The #ifdef ENABLE_HAZE below is redundant (shaders.properties already
-// disables this program), but Iris only lists a toggle in the menu if some
-// shader tests it, so it must stay.
-
-/* RENDERTARGETS: 0 */
-
-uniform sampler2D colortex0;
-uniform sampler2D depthtex0;
-uniform mat4 gbufferProjectionInverse;
-uniform mat4 gbufferModelViewInverse;
-uniform vec3 fogColor;
 uniform vec3 skyColor;
 uniform vec3 sunPosition;
 uniform vec3 upPosition;
-uniform float sunAngle;
 uniform float far;
-uniform float rainStrength;
 uniform float blindness;
 uniform int isEyeInWater;
-uniform bool hasSkylight;
 uniform ivec2 eyeBrightnessSmooth;
 
 #include "/lib/sky.glsl"
 
-in vec2 texcoord;
-
-layout(location = 0) out vec4 outColor;
-
-void main() {
-    vec4 scene = texture(colortex0, texcoord);
-    float depth = texture(depthtex0, texcoord).r;
-    vec3 ndc = vec3(texcoord, depth) * 2.0 - 1.0;
-    vec4 v = gbufferProjectionInverse * vec4(ndc, 1.0);
-    vec3 viewPos = v.xyz / v.w;
+// Returns the scene color mixed with the fog for a surface at viewPos.
+// isSky: nothing was drawn there (depth 1), so only the in-medium fogs apply.
+vec3 applyAtmosphere(vec3 scene, vec3 viewPos, bool isSky) {
+#ifdef ENABLE_HAZE
     float dist = length(viewPos);
     vec3 dir = viewPos / max(dist, 0.0001);
-
-    bool isSky = depth >= 1.0;
-    // Clouds leave colortex0 alpha at 0 (see blend.gbuffers_clouds in
-    // shaders.properties); everything deferred lit has alpha 1, and water
-    // blended over a cloud only raises it to the water's own alpha.
-    bool isCloud = scene.a < 0.5;
 
     // How much sky the camera can see (caves -> 0). Dimensions without sky
     // (Nether, End) keep their fog color at full strength.
@@ -61,8 +35,7 @@ void main() {
         fogAmt = 1.0 - exp(-dist * 0.035);
     } else if (isEyeInWater == 2) {
         fogAmt = 1.0 - exp(-dist * 0.45);
-    } else if (!isSky && !isCloud) {
-        // Sky and clouds already carry their own gradient / distance fade.
+    } else if (!isSky) {
         // Terrain fades toward the sky color behind it, so a fully fogged
         // object is exactly the sky (no silhouette).
         fogCol = skyGradient(dir);
@@ -93,11 +66,8 @@ void main() {
         fogAmt = max(fogAmt, 1.0 - exp(-dist * 0.35 * blindness));
         fogCol = mix(fogCol, vec3(0.0), blindness);
     }
-
-#ifdef ENABLE_HAZE
-    scene.rgb = mix(scene.rgb, fogCol, clamp(fogAmt, 0.0, 1.0));
+    return mix(scene, fogCol, clamp(fogAmt, 0.0, 1.0));
+#else
+    return scene;
 #endif
-    // Alpha carries luma for FXAA in final (it reads luma from four corner
-    // neighbours, so one stored value spares four dot products per tap).
-    outColor = vec4(scene.rgb, dot(scene.rgb, vec3(0.2126, 0.7152, 0.0722)));
 }

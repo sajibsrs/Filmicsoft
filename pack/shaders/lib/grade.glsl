@@ -1,4 +1,4 @@
-// Colour grade shared by final.fsh (direct) and composite4.fsh (bakes a LUT).
+// Colour grade used by final.fsh.
 // Needs lib/options.glsl included first. Pure function of one RGB colour.
 
 const vec3 LUMA = vec3(0.2126, 0.7152, 0.0722);

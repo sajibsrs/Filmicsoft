@@ -46,8 +46,8 @@ filmic image as possible **without GI or ray tracing**, and stay fast.
   - `lib/options.glsl` - every user option, shared by all passes
   - `gbuffers_*.fsh` - write the packed G-buffer (`lib/gbuf.glsl`); water is lit directly
   - `deferred.fsh` - lighting: sun/moon direction, sky ambient, torch light
-  - `lib/lighting.glsl` - the lighting model (no shadow maps)
-  - `composite.fsh` - atmosphere (haze, sun glow, fluid fog), before bloom and FXAA
+  - `lib/lighting.glsl` - the lighting model (sky-light fake shadow, plus the optional shadow map)
+  - `lib/fog.glsl` - atmosphere (haze, sun glow, fluid fog), applied in `deferred.fsh` and `gbuffers_water.fsh`
   - `gbuffers_skybasic.fsh`, `lib/sky.glsl` - sky gradient that fog and clouds fade toward
   - `composite1-3.fsh` - bloom prefilter, two 4x downsamples, diffusion source
   - `final.fsh` - bloom/diffusion mix, grading, lens, grain

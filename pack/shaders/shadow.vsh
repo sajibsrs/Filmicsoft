@@ -5,6 +5,11 @@
 
 #include "/lib/options.glsl"
 
+// Iris only lists an option in the menu if some shader file mentions it.
+// SHADOW_ENTITIES itself is read by shaders.properties (shadowEntities=...).
+#ifdef SHADOW_ENTITIES
+#endif
+
 out vec2 texcoord;
 
 void main() {

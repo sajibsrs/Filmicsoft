@@ -40,7 +40,7 @@ vec2 shadowTerm(vec3 feet, vec3 nWS) {
     if (!hasSkylight) return vec2(1.0, 0.0);
     float h = sin(sunAngle * 6.28318530718);
     float dist = length(feet);
-    float w = (1.0 - smoothstep(0.70 * SHADOW_DISTANCE, 0.95 * SHADOW_DISTANCE, dist))
+    float w = (1.0 - smoothstep(0.45 * SHADOW_DISTANCE, 0.95 * SHADOW_DISTANCE, dist))
             * smoothstep(0.05, 0.25, h);
     if (w <= 0.0) return vec2(1.0, 0.0);
 
@@ -163,5 +163,13 @@ vec3 shadeSurface(vec3 albedoGamma, vec2 lm, vec3 nWS, float ao, float foliage, 
     // ---- Self-emission: a light source shows its own colour, shade or not --
     vec3 glow = albedo * emissive * EMISSIVE_GLOW;
 
-    return toGamma(rolloff(albedo * (direct + ambient + block + floorLight) + glow));
+    // Very pale surfaces (white wool, snow, quartz) reflect so much that sun
+    // plus sky pushes every texel past the rolloff and they go flat white.
+    // Pulling their sun and sky light down by up to 30% keeps their texture
+    // inside the range the rolloff can still resolve. Darker albedos are
+    // untouched. (Block light keeps its full strength.)
+    float pale = smoothstep(0.45, 0.75, dot(albedo, LIGHT_LUMA));
+    vec3 lightTotal = (direct + ambient) * (1.0 - 0.30 * pale) + block + floorLight;
+
+    return toGamma(rolloff(albedo * lightTotal + glow));
 }
