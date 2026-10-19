@@ -161,7 +161,11 @@ vec3 shadeSurface(vec3 albedoGamma, vec2 lm, vec3 nWS, float ao, float foliage, 
     }
 
     // ---- Self-emission: a light source shows its own colour, shade or not --
-    vec3 glow = albedo * emissive * EMISSIVE_GLOW;
+    // The emissive flag covers the whole block, so weight it per texel: bright
+    // glass, flame and lava glow fully, dark metal and wood (lantern frame,
+    // torch stick) stay dark and keep the contrast that makes the glow read.
+    float glowMask = smoothstep(0.18, 0.45, max(max(albedo.r, albedo.g), albedo.b));
+    vec3 glow = albedo * emissive * EMISSIVE_GLOW * glowMask;
 
     // Very pale surfaces (white wool, snow, quartz) reflect so much that sun
     // plus sky pushes every texel past the rolloff and they go flat white.
