@@ -81,3 +81,4 @@ option.SHADOW_DISTANCE=Shadow Distance (blocks)
 option.SHADOW_RESOLUTION=Shadow Resolution
 option.SHADOW_FILTER=Shadow Edge Quality (0 hard .. 3 best)
 option.SHADOW_SOFTNESS=Shadow Edge Softness
+option.SHADOW_ENTITIES=Mobs Cast Shadows (costs FPS)

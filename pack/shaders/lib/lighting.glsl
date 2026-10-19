@@ -18,6 +18,7 @@ uniform vec3 fogColor;
 // Read by Iris to size the shadow pass.
 const int shadowMapResolution = SHADOW_RESOLUTION;
 const float shadowDistance = SHADOW_DISTANCE;
+const float shadowDistanceRenderMul = 1.0;   // don't draw terrain beyond shadowDistance into the map
 const bool shadowHardwareFiltering = true;   // shadowtex1 becomes a sampler2DShadow (free 2x2 PCF)
 
 uniform sampler2DShadow shadowtex1;          // opaque casters only: glass and water don't shadow

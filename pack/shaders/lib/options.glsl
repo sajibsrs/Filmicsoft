@@ -82,6 +82,7 @@
 #define SHADOW_RESOLUTION 1024   // [512 1024 2048]
 #define SHADOW_FILTER 1          // [0 1 2 3]  edge quality: 0 hardware 2x2 only, 1 = 4 taps, 2 = 8 taps, 3 = 16 taps
 #define SHADOW_SOFTNESS 1.5      // [0.5 1.0 1.5 2.0 3.0]  blur radius of the shadow edge, in shadow-map texels
+//#define SHADOW_ENTITIES        // Mobs and items cast shadows too (every entity is drawn a second time: costs CPU)
 
 // ---- Atmosphere ------------------------------------------------------------
 #define HAZE_AMOUNT 0.50         // [0.00 0.50 1.00 1.50 2.00]
