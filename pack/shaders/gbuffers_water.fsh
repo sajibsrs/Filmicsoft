@@ -21,6 +21,6 @@ void main() {
     vec4 tex = texture(gtexture, texcoord);
     // Terrain programs carry vertex AO in glcolor.a (separateAo=true).
     vec3 lit = shadeSurface(tex.rgb * glcolor.rgb, clamp(lmcoord, 0.0, 1.0),
-                            normalize(normal), glcolor.a, 0.0, 0.0);
+                            normalize(normal), glcolor.a, 0.0, 0.0, vec2(1.0, 0.0));
     outColor = vec4(lit, tex.a);
 }

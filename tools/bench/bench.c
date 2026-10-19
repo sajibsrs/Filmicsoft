@@ -19,7 +19,7 @@
 #define MAXTEX 16
 
 static int W, H;
-static GLuint colorTex[MAXTEX], altTex[MAXTEX], depthTex;
+static GLuint colorTex[MAXTEX], altTex[MAXTEX], depthTex, shadowTex;
 static int texW[MAXTEX], texH[MAXTEX];
 static GLenum texIntFmt[MAXTEX];
 static float texScale[MAXTEX], texScaleY[MAXTEX];
@@ -103,7 +103,10 @@ static void setUniforms(GLuint prog, int *attachIdx, int nAttach, int parity) {
         glGetActiveUniform(prog, i, sizeof name, &len, &size, &type, name);
         GLint loc = glGetUniformLocation(prog, name);
         if (loc < 0) continue;
-        if (type == GL_SAMPLER_2D) {
+        if (type == GL_SAMPLER_2D_SHADOW) {
+            glActiveTexture(GL_TEXTURE0 + unit); glBindTexture(GL_TEXTURE_2D, shadowTex);
+            glUniform1i(loc, unit++);
+        } else if (type == GL_SAMPLER_2D) {
             GLuint t = depthTex; int n = -1;
             if (sscanf(name, "colortex%d", &n) == 1 && n >= 0 && n < MAXTEX) {
                 t = colorTex[n];
@@ -125,7 +128,13 @@ static void setUniforms(GLuint prog, int *attachIdx, int nAttach, int parity) {
         } else if (type == GL_FLOAT_VEC4) glUniform4f(loc, 0, 0, 0, 0);
         else if (type == GL_BOOL || type == GL_INT) glUniform1i(loc, !strcmp(name, "hasSkylight") ? 1 : 0);
         else if (type == GL_INT_VEC2) glUniform2i(loc, 240, 240);
-        else if (type == GL_FLOAT_MAT4) glUniformMatrix4fv(loc, 1, GL_FALSE, !strcmp(name, "gbufferProjectionInverse") ? proj : ident);
+        else if (type == GL_FLOAT_MAT4) {
+            // Shadow projection scaled so reconstructed positions land inside the map
+            // (identity would clamp every lookup to one texel and look free).
+            float sproj[16] = {1/36.f,0,0,0, 0,1/36.f,0,0, 0,0,-1/72.f,0, 0,0,0,1};
+            glUniformMatrix4fv(loc, 1, GL_FALSE, !strcmp(name, "gbufferProjectionInverse") ? proj
+                               : !strcmp(name, "shadowProjection") ? sproj : ident);
+        }
     }
 }
 
@@ -167,6 +176,16 @@ int main(int argc, char **argv) {
         altTex[i] = makeTex(texW[i], texH[i], texIntFmt[i], GL_RGBA, GL_UNSIGNED_BYTE, px, i == 0);
         free(px);
     }
+    { // 2048^2 noise depth map with hardware compare, standing in for the shadow map.
+      int S = 2048; float *sd = malloc((size_t)S * S * sizeof(float));
+      for (int k = 0; k < S * S; k++) sd[k] = ((unsigned)(k * 2654435761u) >> 8) / 16777216.0f;
+      glGenTextures(1, &shadowTex); glBindTexture(GL_TEXTURE_2D, shadowTex);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, S, S, 0, GL_DEPTH_COMPONENT, GL_FLOAT, sd);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+      free(sd); }
     { unsigned char *nz = malloc(256 * 256 * 4);
       for (int k = 0; k < 256 * 256 * 4; k++) nz[k] = (unsigned char)(((unsigned)(k + 3) * 2654435761u) >> 24);
       noiseTex = makeTex(256, 256, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, nz, 0);

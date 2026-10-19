@@ -13,6 +13,10 @@
 
 uniform sampler2D colortex0;
 uniform sampler2D colortex1;
+#ifdef ENABLE_SHADOWS
+uniform sampler2D depthtex0;
+uniform mat4 gbufferProjectionInverse;
+#endif
 
 in vec2 texcoord;
 
@@ -27,5 +31,13 @@ void main() {
     }
     float foliage, emissive;
     vec2 lm = unpackLight(d.rg, foliage, emissive);
-    outColor = vec4(shadeSurface(c.rgb, lm, unpackNormal(d.ba), c.a, foliage, emissive), 1.0);
+    vec3 n = unpackNormal(d.ba);
+    vec2 sh = vec2(1.0, 0.0);
+#ifdef ENABLE_SHADOWS
+    vec3 ndc = vec3(texcoord, texture(depthtex0, texcoord).r) * 2.0 - 1.0;
+    vec4 vp = gbufferProjectionInverse * vec4(ndc, 1.0);
+    vec3 feet = (gbufferModelViewInverse * vec4(vp.xyz / vp.w, 1.0)).xyz;
+    sh = shadowTerm(feet, n);
+#endif
+    outColor = vec4(shadeSurface(c.rgb, lm, n, c.a, foliage, emissive, sh), 1.0);
 }

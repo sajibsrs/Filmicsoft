@@ -6,6 +6,7 @@
 #define ENABLE_HAZE              // Distance haze, sun glow, water/lava fog
 #define ENABLE_GRAIN             // Film grain
 #define ENABLE_FXAA              // Edge anti-aliasing (FXAA, one extra texture neighbourhood)
+//#define ENABLE_SHADOWS         // Real sun/moon shadow map (extra geometry pass + filtered lookups; off = sky-light fake shadow)
 
 // ---- Grading ---------------------------------------------------------------
 #define EXPOSURE 1.00            // [0.50 0.60 0.70 0.80 0.90 1.00 1.10 1.20 1.30 1.40 1.50]
@@ -73,6 +74,14 @@
 #define EMISSIVE_GLOW 1.50       // [0.00 0.50 1.00 1.25 1.50 2.00 2.50 3.00]  lava, glowstone, lanterns, torches
 #define MOON_BRIGHTNESS 0.50    // [0.00 0.50 0.75 1.00 1.50 2.00 3.00]
 #define AO_STRENGTH 2.50         // [0.00 0.50 1.00 1.30 1.60 2.00 2.50 3.00 3.50 4.00 4.50 5.00]
+
+// ---- Shadows (only used when ENABLE_SHADOWS is on) -------------------------
+// Map covers SHADOW_DISTANCE blocks around the player; beyond it the sky-light
+// fake shadow takes over (cross-faded). Texel size = 2 * distance / resolution.
+#define SHADOW_DISTANCE 36       // [16 24 36 48 64]  blocks
+#define SHADOW_RESOLUTION 1024   // [512 1024 2048]
+#define SHADOW_FILTER 1          // [0 1 2 3]  edge quality: 0 hardware 2x2 only, 1 = 4 taps, 2 = 8 taps, 3 = 16 taps
+#define SHADOW_SOFTNESS 1.5      // [0.5 1.0 1.5 2.0 3.0]  blur radius of the shadow edge, in shadow-map texels
 
 // ---- Atmosphere ------------------------------------------------------------
 #define HAZE_AMOUNT 0.50         // [0.00 0.50 1.00 1.50 2.00]

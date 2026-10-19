@@ -51,7 +51,7 @@ def vsh_to_core(t):
 
 
 for f in sorted(root.glob('*.vsh')):
-    if f.name.startswith('gbuffers_'):
+    if f.name.startswith(('gbuffers_', 'shadow')):
         continue          # real geometry; checked in-game
     t = substitute_options(expand(f.read_text()))
     (out / f.name).write_text(vsh_to_core(t))
