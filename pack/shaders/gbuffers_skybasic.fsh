@@ -27,9 +27,11 @@ void main() {
         outColor = glcolor;
         return;
     }
-    // Stars: their vertex color is not a usable brightness here, so fade them
-    // in only as the sky gets dark (and out in rain).
-    if (renderStage == MC_RENDER_STAGE_STARS) {
+    // Stars: on this Minecraft/Iris combo they do not report
+    // MC_RENDER_STAGE_STARS, so anything that is neither the dome nor the sunset
+    // fan is a star. Their vertex color is not a usable brightness here, so fade
+    // them in only as the sky gets dark (and out in rain).
+    if (renderStage != MC_RENDER_STAGE_SKY) {
         float skyLum = dot(skyColor, vec3(0.2126, 0.7152, 0.0722));
         float a = (1.0 - smoothstep(0.02, 0.15, skyLum)) * (1.0 - rainStrength);
         if (a <= 0.0) discard;
