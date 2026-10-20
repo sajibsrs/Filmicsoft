@@ -4,12 +4,12 @@
 
 | # | Idea | Visual gain | Cost | Notes |
 |---|------|-------------|------|-------|
-| 2 | Better water | High in villages, rivers and oceans | Low | Fresnel (edge-on views reflect more sky), a sky-colour reflection plus the sun glint, and animated normal ripples. No screen-space reflections, so no extra pass. |
-| 3 | Water picks up sunset colour | Medium | ~0 | Comes almost free with #2: the reflected sky is already sunset-coloured. |
+| 2 | Better water (rest) | High in villages, rivers and oceans | Low | Sky reflection + Fresnel done with #3; still to do: sun glint and animated normal ripples. No screen-space reflections, so no extra pass. |
 | 5 | Cloud lighting | Medium | ~0 | Shade clouds by sun angle (warm undersides at sunset), plus a cloud brightness slider. |
 | 7 | Underwater look | Medium | Low | Caustic shimmer and a stronger blue-green fall-off. |
 
-Done: #1 waving plants (220bc02), #4 sky scattering (f1af8cf), #6 rain atmosphere (3382a39).
+Done: #1 waving plants (220bc02), #4 sky scattering (f1af8cf), #6 rain atmosphere (3382a39),
+#3 water sky + sunset reflection (measured +0.15 ms worst case, full-screen water at 1080p).
 
 ## Rain follow-ups
 
