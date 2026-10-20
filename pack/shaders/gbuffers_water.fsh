@@ -1,7 +1,7 @@
 #version 330 compatibility
 
-// Translucent terrain (water, stained glass, ice). Drawn after the deferred
-// pass, so it is lit directly with the same model as opaque surfaces.
+// Translucent terrain (water, stained glass, ice). Lit directly with the same
+// model as opaque surfaces, minus the shadow map (it holds opaque casters only).
 
 #include "/lib/options.glsl"
 #include "/lib/lighting.glsl"

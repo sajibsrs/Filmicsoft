@@ -4,6 +4,7 @@ out vec2 texcoord;
 out vec2 lmcoord;
 out vec4 glcolor;
 out vec3 normal;
+out vec3 viewPos;
 flat out int foliage;
 flat out int emissive;
 
@@ -16,6 +17,7 @@ void main() {
     texcoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;
     lmcoord = (gl_TextureMatrix[1] * gl_MultiTexCoord1).xy;
     lmcoord = lmcoord / (30.0 / 32.0) - (1.0 / 32.0);
+    viewPos = (gl_ModelViewMatrix * gl_Vertex).xyz;
     glcolor = gl_Color;
     foliage = int(mc_Entity.x) == 10001 ? 1 : 0;
     emissive = int(mc_Entity.x) == 10002 ? 1 : 0;

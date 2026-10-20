@@ -3,28 +3,32 @@
 // Sky dome. Vanilla draws a flat sky plane and relies on its fog to blend it
 // into the horizon; Iris removes that fog, which leaves a hard pale band where
 // the clear color shows through. Rebuild the gradient per pixel instead.
+// Underwater, in lava and when blind the sky takes that fog (lib/fog.glsl).
 
 /* RENDERTARGETS: 0 */
 
+#include "/lib/options.glsl"
+#include "/lib/lighting.glsl"
+#include "/lib/fog.glsl"
+
 uniform mat4 gbufferProjectionInverse;
-uniform vec3 skyColor;
-uniform vec3 fogColor;
-uniform vec3 upPosition;
 uniform float viewWidth;
 uniform float viewHeight;
-uniform float rainStrength;
 uniform int renderStage;
-
-#include "/lib/sky.glsl"
 
 in vec4 glcolor;
 
 layout(location = 0) out vec4 outColor;
 
+// The sky is at "infinite" distance, so the in-medium fogs cover it fully.
+vec3 skyFog(vec3 c) {
+    return applyAtmosphere(c, vec3(0.0, 0.0, -1024.0), true);
+}
+
 void main() {
     // Sunrise/sunset glow is a vertex-colored fan: draw it as vanilla does.
     if (renderStage == MC_RENDER_STAGE_SUNSET) {
-        outColor = glcolor;
+        outColor = vec4(skyFog(glcolor.rgb), glcolor.a);
         return;
     }
     // Stars: on this Minecraft/Iris combo they do not report
@@ -35,11 +39,11 @@ void main() {
         float skyLum = dot(skyColor, vec3(0.2126, 0.7152, 0.0722));
         float a = (1.0 - smoothstep(0.02, 0.15, skyLum)) * (1.0 - rainStrength);
         if (a <= 0.0) discard;
-        outColor = vec4(vec3(1.0), a);
+        outColor = vec4(skyFog(vec3(1.0)), a);
         return;
     }
 
     vec4 p = gbufferProjectionInverse *
              vec4(gl_FragCoord.xy / vec2(viewWidth, viewHeight) * 2.0 - 1.0, 1.0, 1.0);
-    outColor = vec4(skyGradient(normalize(p.xyz / p.w)), 1.0);
+    outColor = vec4(skyFog(skyGradient(normalize(p.xyz / p.w))), 1.0);
 }

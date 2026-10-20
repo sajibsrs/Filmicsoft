@@ -70,6 +70,33 @@ Where the `final` pass spends its time at 1080p (removing one feature at a
 time, before the last round of changes): grain 0.13 ms, atmosphere 0.12, bloom
 and diffusion fetches 0.10, colour mixer 0.05, chromatic fringe ~0.
 
+### In-game bisection: why the pack went forward (2026-10-20)
+
+The harness above only times fullscreen draws. In-game, with every effect and
+shadows off, Filmicsoft still ran at ~180 FPS where vanilla ran ~270, so the
+real cost was hunted with stripped-down packs at one savanna spot (dense grass,
+1920x1022, M4, render distance 8). Each pack adds one thing to the previous:
+
+| Pack | FPS | ms/frame | Step cost |
+|---|---|---|---|
+| Pass-through (Iris, no pack work) | 290 | 3.45 | - |
+| + our gbuffers programs, 1 target, no `mc_Entity` | 250 | 4.00 | 0.55 |
+| + `mc_Entity` block ids | 240 | 4.17 | 0.17 |
+| + second G-buffer target | 230 | 4.35 | 0.2 |
+| + deferred pass (copy-only gave the same 180) | 180 | 5.56 | **1.2** |
+| + final pass | ~185 | ~5.4 | ~0 (noise) |
+
+The deferred pass cost ~1.2 ms *just by existing*: a pass between the opaque
+and translucent geometry forces the GPU to store the scene to memory and load
+it back (tile-based GPUs keep it on chip otherwise), and Iris copies depth for
+it. The lighting math in it was nearly free. The pack now lights surfaces where
+they are drawn (`lib/surface.glsl`); the G-buffer and the deferred pass are
+gone. Trade-off: overlapping cutout foliage is lit once per drawn layer.
+
+Harness after the change (1920x1022, best of 15): terrain layer + post chain
+2.53 -> 1.35 ms with defaults, 1.04 -> 0.55 ms with everything off. In-game,
+same spot, everything on (shadows included): ~150 -> ~170 FPS (6.7 -> 5.9 ms).
+
 ### Projected FPS impact
 
 FPS is nonlinear, so convert to frame time:

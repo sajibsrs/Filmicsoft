@@ -1,12 +1,11 @@
 #version 330 compatibility
 
-// Clouds. Unlit (deferred passes them through) and tagged in colortex1 so
-// final.fsh gives them the sky's horizon haze instead of terrain distance fog,
-// which would paint far cloud boxes solid fog color.
+// Clouds. Unlit: they fade into the sky color on their own instead of taking
+// terrain distance fog, which would paint far cloud boxes solid fog color.
 // Distance fades the cloud into transparency, like vanilla, so the grid of
 // boxes dissolves toward the horizon instead of ending in hard edges.
 
-/* RENDERTARGETS: 0,1 */
+/* RENDERTARGETS: 0 */
 
 uniform sampler2D gtexture;
 uniform vec3 skyColor;
@@ -23,7 +22,6 @@ in vec4 glcolor;
 in vec3 viewPos;
 
 layout(location = 0) out vec4 outColor;
-layout(location = 1) out vec4 outTag;
 
 void main() {
     vec4 c = texture(gtexture, texcoord) * glcolor;
@@ -43,5 +41,4 @@ void main() {
     if (c.a < 0.01) discard;
 
     outColor = c;
-    outTag = vec4(0.0, 0.0, 1.0, 0.0);
 }

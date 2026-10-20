@@ -1,5 +1,5 @@
-// Filmicsoft lighting model. Shared by the deferred pass (opaque surfaces)
-// and gbuffers_water (translucent, lit directly).
+// Filmicsoft lighting model. Shared by every lit geometry program: opaque
+// surfaces through lib/surface.glsl, translucents in gbuffers_water.
 //
 // Include AFTER lib/options.glsl. No shadow maps: "is this sunlit?" comes from
 // the sky-light level of the vanilla lightmap, which already drops under

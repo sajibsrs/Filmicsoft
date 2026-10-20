@@ -4,7 +4,7 @@
 // the pack's (size.buffer.*), with synthetic input data, and times each pass.
 // This measures the pass cost, not the game: terrain geometry, CPU work and
 // overdraw are not included. The terrain pass is drawn as one fullscreen layer
-// to show the cost of its 3 render targets.
+// to show the cost of writing and lighting one layer.
 //
 // Usage: bench <width> <height> <shaders-dir-prepared-by-prep.py> <shaders.properties>
 #define GL_SILENCE_DEPRECATION
@@ -27,9 +27,9 @@ static int texAbsW[MAXTEX], texAbsH[MAXTEX];   // size.buffer values without a '
 static GLuint vao, noiseTex;
 
 static const char *VS =
-    "#version 410 core\nout vec2 texcoord;out vec2 lmcoord;out vec4 glcolor;out vec3 normal;flat out int foliage;flat out int emissive;\n"
+    "#version 410 core\nout vec2 texcoord;out vec2 lmcoord;out vec4 glcolor;out vec3 normal;out vec3 viewPos;flat out int foliage;flat out int emissive;\n"
     "void main(){vec2 p=vec2((gl_VertexID<<1)&2, gl_VertexID&2);"
-    "texcoord=p; lmcoord=vec2(0.8,0.9); glcolor=vec4(1.0,1.0,1.0,0.9); normal=vec3(0.0,1.0,0.0);foliage=0;emissive=0;"
+    "texcoord=p; lmcoord=vec2(0.8,0.9); glcolor=vec4(1.0,1.0,1.0,0.9); normal=vec3(0.0,1.0,0.0);viewPos=vec3((p*2.0-1.0)*8.0,-12.0);foliage=0;emissive=0;"
     "gl_Position=vec4(p*2.0-1.0,0.0,1.0);}\n";
 
 static const char *COPY_FS =

@@ -67,7 +67,7 @@
 #define GRAIN_SIZE 4.0           // [1.0 1.5 2.2 3.0 4.0 5.0 6.0 8.0 10.0]
 #define GRAIN_SPEED 24           // [0 6 10 16 24 36]  pattern changes per second (0 = still)
 
-// ---- Lighting (deferred, no shadow maps) -----------------------------------
+// ---- Lighting (forward, in the geometry programs) ---------------------------
 #define SUN_INTENSITY 1.25     // [0.00 0.25 0.50 0.75 1.00 1.10 1.20 1.25 1.30 1.35 1.50 1.75 2.00]
 #define AMBIENT_INTENSITY 0.50 // [0.00 0.05 0.10 0.15 0.20 0.25 0.30 0.40 0.50 0.75 1.00]
 #define BLOCKLIGHT_INTENSITY 1.25 // [0.00 0.50 0.75 1.00 1.25 1.50 2.00]

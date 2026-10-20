@@ -1,10 +1,10 @@
 // Atmosphere: distance haze toward the sky color, a warm glow toward the sun,
 // and the water / lava / blindness fog vanilla would normally draw.
-// Applied where each surface is shaded (deferred for everything opaque and the
-// sky, gbuffers_water for translucents), so no separate full-screen pass reads
-// and rewrites the scene. Include after lib/options.glsl and lib/lighting.glsl
-// (which declare sunAngle, rainStrength, hasSkylight, fogColor,
-// gbufferModelViewInverse).
+// Applied where each surface is shaded (lib/surface.glsl for opaque geometry,
+// gbuffers_water for translucents, gbuffers_skybasic for the in-medium fogs on
+// the sky), so no separate full-screen pass reads and rewrites the scene.
+// Include after lib/options.glsl and lib/lighting.glsl (which declare sunAngle,
+// rainStrength, hasSkylight, fogColor, gbufferModelViewInverse).
 // The #ifdef ENABLE_HAZE in applyAtmosphere keeps the menu toggle listed.
 
 uniform vec3 skyColor;

@@ -32,7 +32,10 @@ def substitute_options(text):
 
 # Values don't matter for a compile check, only that the names exist.
 IRIS_MACROS = '\n'.join('#define MC_RENDER_STAGE_%s %d' % (n, i) for i, n in enumerate(
-    ['NONE', 'SKY', 'SUNSET', 'CUSTOM_SKY', 'SUN', 'MOON', 'STARS', 'VOID'])) + '\n'
+    ['NONE', 'SKY', 'SUNSET', 'CUSTOM_SKY', 'SUN', 'MOON', 'STARS', 'VOID', 'TERRAIN_SOLID',
+     'TERRAIN_CUTOUT_MIPPED', 'TERRAIN_CUTOUT', 'ENTITIES', 'BLOCK_ENTITIES', 'DESTROY', 'OUTLINE', 'DEBUG',
+     'HAND_SOLID', 'TERRAIN_TRANSLUCENT', 'TRIPWIRE', 'PARTICLES', 'CLOUDS', 'RAIN_SNOW', 'WORLD_BORDER',
+     'HAND_TRANSLUCENT'])) + '\n'
 
 for f in sorted(root.glob('*.fsh')):
     t = substitute_options(expand(f.read_text()))

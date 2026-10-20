@@ -22,7 +22,7 @@ filmic image as possible **without GI or ray tracing**, and stay fast.
   `BENCHMARK.md`) and kept only if it earns its cost. The post-processing chain
   adds about 1.2 ms per frame at 1080p on an Apple M4; the shadow map is extra
   and can be turned off or made cheaper (see Options).
-- **Realism from cheap tricks.** Deferred lighting with a soft sun/moon, sky
+- **Realism from cheap tricks.** Forward lighting with a soft sun/moon, sky
   ambient and warm torch light, and a real filtered shadow map for the sun and
   moon (with a sky-light fake as the fallback when it is off or out of range).
   Distance haze matches the sky. Then a film look on top: bloom, diffusion,
@@ -32,9 +32,9 @@ filmic image as possible **without GI or ray tracing**, and stay fast.
   Filmicsoft is written for GLSL 330: no compute shaders, no SSBOs. It is
   built and tested on Apple Silicon, and should work the same on Windows and
   Linux.
-- **Light on your system.** Small render targets, a packed G-buffer and
-  low-resolution bloom keep memory use and bandwidth low, which also matters
-  on laptops and integrated GPUs.
+- **Light on your system.** Surfaces are lit where they are drawn (no
+  G-buffer, no deferred pass) and bloom runs at low resolution, keeping
+  memory use and bandwidth low; that also matters on laptops and integrated GPUs.
 
 ## What's new in 2.0.0
 
@@ -60,11 +60,11 @@ filmic image as possible **without GI or ray tracing**, and stay fast.
 
 - `pack/shaders/` - the shader pack itself (installed as `Filmicsoft` in `shaderpacks/`)
   - `lib/options.glsl` - every user option, shared by all passes
-  - `gbuffers_*.fsh` - write the packed G-buffer (`lib/gbuf.glsl`); water is lit directly
-  - `deferred.fsh` - lighting: sun/moon direction, sky ambient, torch light
+  - `gbuffers_*.fsh` - draw and light each surface in one go (forward shading)
+  - `lib/surface.glsl` - per-surface lighting, shadow map, sheen and haze for opaque geometry
   - `shadow.fsh`, `shadow.vsh` - the shadow map pass
   - `lib/lighting.glsl` - the lighting model (shadow map lookups, sky-light fake as fallback, highlight rolloff, emissive glow)
-  - `lib/fog.glsl` - atmosphere (haze, sun glow, fluid fog), applied in `deferred.fsh` and `gbuffers_water.fsh`
+  - `lib/fog.glsl` - atmosphere (haze, sun glow, fluid fog), applied where each surface is lit, and to the sky underwater
   - `gbuffers_skybasic.fsh`, `lib/sky.glsl` - sky gradient that fog and clouds fade toward
   - `composite1-2.fsh` - bloom prefilter and downsample, diffusion source
   - `final.fsh` - bloom/diffusion mix, grading, lens, grain
