@@ -40,8 +40,15 @@ vec3 applyAtmosphere(vec3 scene, vec3 viewPos, bool isSky) {
         // object is exactly the sky (no silhouette).
         fogCol = skyGradient(dir);
 
-        float weatherBoost = 1.0 + rainStrength * 2.0;
-        float haze = 1.0 - exp(-dist * 0.43 / max(far, 32.0) * HAZE_AMOUNT * weatherBoost);
+        float weatherBoost = 1.0 + rainStrength * 2.0 * (0.5 + 0.5 * RAIN_MOOD);
+        // Rain curtain: its own density, independent of HAZE_AMOUNT, so the
+        // far end of the render distance is ~90% gone and mid-distance soft.
+        // Thunder darkens the fog colour to near the terrain's own shade, so
+        // the same density reads as clearer air; it gets extra density here
+        // (and a lifted sky colour in lib/sky.glsl) to keep the curtain at the
+        // same range.
+        float rainDensity = rainStrength * RAIN_MOOD * 2.3 * (1.0 + 0.6 * thunderStrength);
+        float haze = 1.0 - exp(-dist / max(far, 32.0) * (0.43 * HAZE_AMOUNT * weatherBoost + rainDensity));
         haze *= skyEye;
         // Hide the chunk border like vanilla: horizontal distance, only the
         // last stretch, so mid-distance stays crisp.

@@ -4,6 +4,8 @@
 // Needs uniforms skyColor, fogColor, upPosition, sunPosition, sunAngle,
 // rainStrength, hasSkylight.
 
+uniform float thunderStrength;
+
 vec3 skyGradient(vec3 viewDir) {
     float up = max(dot(viewDir, normalize(upPosition)), 0.0);
     // Horizon: fogColor carrying some of the sky's blue, so it reads as a
@@ -41,5 +43,10 @@ vec3 skyGradient(vec3 viewDir) {
         // At sunrise / sunset the side away from the sun turns cooler.
         sky = mix(sky, sky * vec3(0.88, 0.94, 1.05), (1.0 - sd) * lowSun * 0.60 * k);
     }
+    // Thunder: vanilla takes the sky (and so the haze) almost to black, where
+    // the storm curtain can't be told from dark terrain. The same cool-grey
+    // floor as the rain drops (lib/rain.glsl). Added to the sky itself, not
+    // only to the fog, so fully fogged terrain still matches the sky behind it.
+    if (hasSkylight) sky += vec3(0.050, 0.058, 0.075) * thunderStrength * RAIN_MOOD;
     return sky;
 }

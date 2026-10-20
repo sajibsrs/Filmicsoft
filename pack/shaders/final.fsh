@@ -32,6 +32,8 @@ uniform sampler2D colortex11;    // god rays (half res, tinted and scaled in com
 uniform float viewWidth;
 uniform float viewHeight;
 uniform float frameTimeCounter;
+uniform float rainStrength;
+uniform ivec2 eyeBrightnessSmooth;   // y = sky light at the camera (0 indoors / caves)
 
 in vec2 texcoord;
 
@@ -165,7 +167,20 @@ void main() {
 #endif
 
     float luma;
-    col = gradeCore(clamp(col * EXPOSURE, 0.0, 1.0));
+    col = clamp(col * EXPOSURE, 0.0, 1.0);
+
+    // Rain mood: overcast light is flat and cool. Only while the camera is
+    // under open sky, so a house or cave in a storm keeps its warm look.
+    float rainMood = rainStrength * RAIN_MOOD * clamp(float(eyeBrightnessSmooth.y) / 240.0, 0.0, 1.0);
+    if (rainMood > 0.0) {
+        luma = dot(col, LUMA);
+        // Mostly a grey-out; only a hint of cool. Vanilla's rain fog and sky are
+        // already blue-grey, so a strong tint on top reads as a blue filter.
+        col = mix(col, vec3(luma), clamp(0.35 * rainMood, 0.0, 0.6));
+        col *= mix(vec3(1.0), vec3(0.985, 0.995, 1.01), clamp(rainMood, 0.0, 1.5));
+        col *= 1.0 - 0.04 * rainMood;
+    }
+    col = gradeCore(clamp(col, 0.0, 1.0));
 
     // Vignette.
     float vig = smoothstep(0.85, 0.25, length(fromCenter) * 1.15);

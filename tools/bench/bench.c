@@ -119,6 +119,7 @@ static void setUniforms(GLuint prog, int *attachIdx, int nAttach, int parity) {
             float v = 0.0f;
             if (!strcmp(name, "viewWidth")) v = W; else if (!strcmp(name, "viewHeight")) v = H;
             else if (!strcmp(name, "far")) v = 128; else if (!strcmp(name, "sunAngle")) v = 0.2f;
+            else if (!strcmp(name, "rainStrength")) v = getenv("RAIN") ? (float)atof(getenv("RAIN")) : 0.0f;
             else if (!strcmp(name, "frameTimeCounter")) v = 12.5f; else if (!strcmp(name, "alphaTestRef")) v = 0.1f;
             glUniform1f(loc, v);
         } else if (type == GL_FLOAT_VEC3) {
