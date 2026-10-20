@@ -67,6 +67,7 @@ option.AO_STRENGTH=Ambient Occlusion
 option.HAZE_AMOUNT=Distance Haze
 option.CLOUD_DISTANCE=Cloud Distance
 option.HAZE_SUN_GLOW=Sun Glow in Haze
+option.SKY_SCATTER=Sky Scattering
 option.GODRAY_STRENGTH=God Ray Strength
 option.GODRAY_SAMPLES=God Ray Quality (taps)
 option.WAVING_STRENGTH=Wind Strength

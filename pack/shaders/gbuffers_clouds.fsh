@@ -11,6 +11,10 @@ uniform sampler2D gtexture;
 uniform vec3 skyColor;
 uniform vec3 fogColor;
 uniform vec3 upPosition;
+uniform vec3 sunPosition;
+uniform float sunAngle;
+uniform float rainStrength;
+uniform bool hasSkylight;
 uniform float far;
 uniform mat4 gbufferModelViewInverse;
 
