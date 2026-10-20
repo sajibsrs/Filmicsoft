@@ -19,8 +19,9 @@ void main() {
     lmcoord = lmcoord / (30.0 / 32.0) - (1.0 / 32.0);
     viewPos = (gl_ModelViewMatrix * gl_Vertex).xyz;
     glcolor = gl_Color;
-    foliage = int(mc_Entity.x) == 10001 ? 1 : 0;
-    emissive = int(mc_Entity.x) == 10002 ? 1 : 0;
+    int id = int(mc_Entity.x);
+    foliage = (id == 10001 || id == 10003) ? 1 : 0;
+    emissive = id == 10002 ? 1 : 0;
     // View space -> player space, so lighting can use the world-oriented sun.
     normal = mat3(gbufferModelViewInverse) * (gl_NormalMatrix * gl_Normal);
 }
