@@ -62,13 +62,28 @@ vec2 shadowTerm(vec3 feet, vec3 nWS) {
         // film grain and FXAA hide.
         float rot = 6.28318530718 * fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))));
         float radius = SHADOW_SOFTNESS / float(SHADOW_RESOLUTION);
+        // Early out: a few spread-out taps first; if they all agree the pixel
+        // is fully lit or fully shadowed (most of the screen), skip the rest.
+        // Only penumbra pixels pay for the full sample count.
+        const int FIRST = SHADOW_SAMPLES < 4 ? SHADOW_SAMPLES : 4;
+        const int STRIDE = SHADOW_SAMPLES / FIRST;
         vis = 0.0;
-        for (int i = 0; i < SHADOW_SAMPLES; i++) {
+        for (int k = 0; k < FIRST; k++) {
+            int i = k * STRIDE + STRIDE / 2;
             float a = float(i) * 2.39996323 + rot;
             float r = sqrt((float(i) + 0.5) / float(SHADOW_SAMPLES)) * radius;
             vis += texture(shadowtex1, vec3(sc.xy + r * vec2(cos(a), sin(a)), sc.z));
         }
-        vis /= float(SHADOW_SAMPLES);
+        vis /= float(FIRST);
+        if (SHADOW_SAMPLES > FIRST && vis > 0.001 && vis < 0.999) {
+            vis = 0.0;
+            for (int i = 0; i < SHADOW_SAMPLES; i++) {
+                float a = float(i) * 2.39996323 + rot;
+                float r = sqrt((float(i) + 0.5) / float(SHADOW_SAMPLES)) * radius;
+                vis += texture(shadowtex1, vec3(sc.xy + r * vec2(cos(a), sin(a)), sc.z));
+            }
+            vis /= float(SHADOW_SAMPLES);
+        }
     }
 #endif
     return vec2(vis, w);

@@ -15,10 +15,12 @@
 const int colortex4Format = RGBA16F;
 const int colortex5Format = RGBA16F;
 const int colortex9Format = RGBA16F;
+const int colortex11Format = RGBA16F;
 const bool colortex4Clear = false;
 const bool colortex5Clear = false;
 const bool colortex9Clear = false;
 const bool colortex10Clear = false;
+const bool colortex11Clear = false;
 */
 
 uniform sampler2D noisetex;      // Iris built-in 256x256 white noise
@@ -26,6 +28,7 @@ uniform sampler2D colortex0;
 uniform sampler2D colortex4;
 uniform sampler2D colortex5;
 uniform sampler2D colortex9;
+uniform sampler2D colortex11;    // god rays (half res, tinted and scaled in composite1)
 uniform float viewWidth;
 uniform float viewHeight;
 uniform float frameTimeCounter;
@@ -153,6 +156,12 @@ void main() {
     vec3 bloom = tap4(colortex4, uv, px * 2.0) * 0.30;
     bloom     += tap4(colortex5, uv, px * 24.0) * 0.70;
     col += bloom * BLOOM_STRENGTH;
+#endif
+
+    // God rays: already tinted and scaled, so a single bilinear upsample.
+    // Screen blend, so bright sky by the sun approaches white instead of clipping.
+#ifdef ENABLE_GODRAYS
+    col += texture(colortex11, uv).rgb * max(1.0 - col, 0.0);
 #endif
 
     float luma;

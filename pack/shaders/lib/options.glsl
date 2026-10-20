@@ -4,6 +4,7 @@
 #define ENABLE_BLOOM             // Glow around bright lights (2 extra passes)
 #define ENABLE_DIFFUSION         // Soft pro-mist haze (shares the bloom passes)
 #define ENABLE_HAZE              // Distance haze, sun glow, water/lava fog
+#define ENABLE_GODRAYS           // Light shafts and sun glare (half-res march inside the bloom pass; skipped when the sun is not in view)
 #define ENABLE_GRAIN             // Film grain
 #define ENABLE_FXAA              // Edge anti-aliasing (FXAA, one extra texture neighbourhood)
 #define ENABLE_SHADOWS           // Real sun/moon shadow map (extra geometry pass + filtered lookups; off = sky-light fake shadow)
@@ -80,7 +81,7 @@
 // fake shadow takes over (cross-faded). Texel size = 2 * distance / resolution.
 #define SHADOW_DISTANCE 64       // [16 24 36 48 64 128]  blocks
 #define SHADOW_RESOLUTION 1024   // [256 512 1024 2048]
-#define SHADOW_SAMPLES 8        // [0 1 2 4 8 16 32 64]  edge antialiasing taps: 0 = off (hard, stair-stepped); more = smoother, costs GPU
+#define SHADOW_SAMPLES 4        // [0 1 2 4 8 16 32 64]  edge antialiasing taps: 0 = off (hard, stair-stepped); more = smoother, costs GPU
 #define SHADOW_SOFTNESS 0.5    // [0.0 0.5 1.0 1.5 2.0 3.0 4.0]  blur radius of the shadow edge, in shadow-map texels (0 = no blur)
 #define SHADOW_ENTITIES          // Mobs and items cast shadows too (every entity is drawn a second time: costs CPU)
 
@@ -88,6 +89,11 @@
 #define HAZE_AMOUNT 0.50         // [0.00 0.50 1.00 1.50 2.00]
 #define CLOUD_DISTANCE 5.0       // [2.0 3.0 4.0 5.0 6.0 8.0]  cloud fade length, in render distances (higher = clouds reach the horizon)
 #define HAZE_SUN_GLOW 0.50       // [0.00 0.25 0.50 0.75 1.00]
+#define GODRAY_STRENGTH 1.00     // [0.00 0.10 0.20 0.30 0.50 0.75 1.00 1.50 2.00]
+#define GODRAY_LIMIT 0.75        // [0.00 0.25 0.50 0.75 1.00]  rays add less over sky that is already bright, so the sky by the sun is not blown out (0 = off)
+#define GODRAY_GLARE 0.25        // [0.00 0.25 0.50 0.75 1.00]  glare over the sun's own quad (0 = vanilla sun untouched, 1 = same as the rest of the halo)
+#define GODRAY_LENGTH 0.80       // [0.30 0.50 0.65 0.80 0.90 1.00]  share of the way to the sun that each ray covers
+#define GODRAY_SAMPLES 16        // [8 12 16 24 32]  taps per pixel at half resolution
 
 // ---- Debug (terrain only): 1 vertex color, 2 AO, 3 normals, 4 lightmap ----
 #define DEBUG_VIEW 0             // [0 1 2 3 4]
