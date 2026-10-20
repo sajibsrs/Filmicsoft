@@ -17,7 +17,7 @@
 #define VIBRANCE 0.20           // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00]
 #define CHROMA_LIMIT 1.00        // [0.00 0.25 0.50 0.70 0.80 0.90 1.00]
 #define SHADOW_TINT 0.10         // [0.00 0.10 0.25 0.50 0.75 1.00]
-#define HIGHLIGHT_TINT 0.25    // [0.00 0.10 0.25 0.50 0.75 1.00]
+#define HIGHLIGHT_TINT 0.10    // [0.00 0.10 0.25 0.50 0.75 1.00]
 
 // ---- Calibration (Lightroom-style primary shifts) --------------------------
 // Red:   + toward orange, - toward magenta
@@ -68,12 +68,13 @@
 #define GRAIN_SPEED 24           // [0 6 10 16 24 36]  pattern changes per second (0 = still)
 
 // ---- Lighting (deferred, no shadow maps) -----------------------------------
-#define SUN_INTENSITY 1.20     // [0.00 0.25 0.50 0.75 1.00 1.10 1.20 1.25 1.30 1.35 1.50 1.75 2.00]
+#define SUN_INTENSITY 1.25     // [0.00 0.25 0.50 0.75 1.00 1.10 1.20 1.25 1.30 1.35 1.50 1.75 2.00]
 #define AMBIENT_INTENSITY 0.50 // [0.00 0.05 0.10 0.15 0.20 0.25 0.30 0.40 0.50 0.75 1.00]
 #define BLOCKLIGHT_INTENSITY 1.25 // [0.00 0.50 0.75 1.00 1.25 1.50 2.00]
 #define HIGHLIGHT_KNEE 0.45      // [0.30 0.40 0.50 0.55 0.60 0.70 0.80 0.90]  lower = earlier, softer rolloff
 #define EMISSIVE_GLOW 1.50       // [0.00 0.50 1.00 1.25 1.50 2.00 2.50 3.00]  lava, glowstone, lanterns, torches
 #define MOON_BRIGHTNESS 0.50    // [0.00 0.50 0.75 1.00 1.50 2.00 3.00]
+#define SURFACE_SHEEN 25       // [0 25 50 100 150 200 300]  percent. View-dependent sun sheen on all surfaces (0 = off, flat Lambert look); strongest at grazing angles
 #define AO_STRENGTH 3.00        // [0.00 0.50 1.00 1.30 1.60 2.00 2.50 3.00 3.50 4.00 4.50 5.00]
 
 // ---- Shadows (only used when ENABLE_SHADOWS is on) -------------------------

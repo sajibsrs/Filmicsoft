@@ -108,6 +108,18 @@ vec3 rolloff(vec3 c) {
     return c * (mapped / m);
 }
 
+// Sunlight visibility 0..1 from the sky-light level, replaced by the shadow map
+// where it is trusted (sh from shadowTerm; vec2(1.0, 0.0) = no map).
+float sunOpen(float sky, vec2 sh) {
+    float open = smoothstep(0.92, 0.99, sky);
+#ifdef ENABLE_SHADOWS
+    // Real shadow where the map is trusted; the sky-light check also keeps
+    // any map leak out of caves.
+    open = mix(open, sh.x * smoothstep(0.15, 0.50, sky), sh.y);
+#endif
+    return open;
+}
+
 // albedoGamma : texture color (display space)
 // lm          : x = block light, y = sky light, both 0..1
 // nWS         : surface normal in player/world orientation, normalised
@@ -139,12 +151,7 @@ vec3 shadeSurface(vec3 albedoGamma, vec2 lm, vec3 nWS, float ao, float foliage, 
         diff = mix(diff, 0.35 + 0.30 * diff, foliage);
         // Fake shadow from the sky-light level: open sky is 15, one leaf
         // layer or an overhang above drops it to 14 (0.935), which is shade.
-        float open = smoothstep(0.92, 0.99, sky);
-#ifdef ENABLE_SHADOWS
-        // Real shadow where the map is trusted; the sky-light check also keeps
-        // any map leak out of caves.
-        open = mix(open, sh.x * smoothstep(0.15, 0.50, sky), sh.y);
-#endif
+        float open = sunOpen(sky, sh);
         vec3 sunCol = mix(vec3(1.00, 0.93, 0.80), vec3(1.00, 0.48, 0.20), warm) * SUN_INTENSITY;
         vec3 moonCol = vec3(0.42, 0.55, 1.00) * 0.10 * MOON_BRIGHTNESS;
         vec3 directCol = mix(moonCol, sunCol, dayAmt) * (1.0 - 0.9 * rain);
@@ -192,4 +199,31 @@ vec3 shadeSurface(vec3 albedoGamma, vec2 lm, vec3 nWS, float ao, float foliage, 
     vec3 lightTotal = (direct + ambient) * (1.0 - 0.30 * pale) + block + floorLight;
 
     return toGamma(rolloff(albedo * lightTotal + glow));
+}
+
+// Sun sheen: one cheap view-dependent term for every lit surface. Without it
+// the only lighting is Lambert, which looks the same from every angle and
+// reads as paper. A broad Blinn-Phong lobe, weighted toward grazing angles
+// (rough surfaces reflect most there), times the same sun visibility as the
+// sun light, so shade, caves, night and rain get none. Returns light to add
+// in display space. feet = player-space position (relative to the camera).
+vec3 sunSheen(vec3 nWS, vec3 feet, float sky, vec2 sh) {
+#if SURFACE_SHEEN > 0
+    if (!hasSkylight) return vec3(0.0);
+    float h = sin(sunAngle * 6.28318530718);
+    float dayAmt = smoothstep(-0.10, 0.20, h);
+    float vis = sunOpen(sky, sh) * dayAmt * (1.0 - 0.9 * rainStrength);
+    if (vis <= 0.001) return vec3(0.0);
+
+    vec3 L = normalize(mat3(gbufferModelViewInverse) * shadowLightPosition);
+    vec3 V = -normalize(feet);
+    float ndh = max(dot(nWS, normalize(L + V)), 0.0);
+    float grazing = pow(1.0 - clamp(dot(nWS, V), 0.0, 1.0), 2.0);
+    float lit = smoothstep(0.0, 0.25, dot(nWS, L));
+    float warm = (1.0 - smoothstep(0.02, 0.50, h)) * dayAmt;
+    vec3 sunCol = mix(vec3(1.00, 0.93, 0.80), vec3(1.00, 0.48, 0.20), warm);
+    return sunCol * pow(ndh, 6.0) * (0.30 + 0.70 * grazing) * lit * vis * (0.45 * float(SURFACE_SHEEN) * 0.01);
+#else
+    return vec3(0.0);
+#endif
 }

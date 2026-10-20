@@ -62,6 +62,7 @@ option.BLOCKLIGHT_INTENSITY=Torch Light
 option.EMISSIVE_GLOW=Emissive Glow (lava, glowstone)
 option.MOON_BRIGHTNESS=Moon / Night Brightness
 option.HIGHLIGHT_KNEE=Highlight Rolloff Start
+option.SURFACE_SHEEN=Surface Sun Sheen % (0 off)
 option.AO_STRENGTH=Ambient Occlusion
 option.HAZE_AMOUNT=Distance Haze
 option.CLOUD_DISTANCE=Cloud Distance

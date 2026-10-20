@@ -41,6 +41,9 @@ void main() {
         sh = shadowTerm(feet, n);
 #endif
         rgb = shadeSurface(c.rgb, lm, n, c.a, foliage, emissive, sh);
+#if SURFACE_SHEEN > 0
+        rgb += sunSheen(n, (gbufferModelViewInverse * vec4(viewPos, 1.0)).xyz, lm.y, sh) * (1.0 - emissive);
+#endif
     }
     // Haze for everything drawn so far (also pass-through pixels and sky).
     // Translucents drawn later fog themselves (gbuffers_water).
