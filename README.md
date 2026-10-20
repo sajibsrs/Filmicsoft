@@ -56,6 +56,17 @@ filmic image as possible **without GI or ray tracing**, and stay fast.
    `.minecraft/shaderpacks/`. (A zip works as is; no need to unzip it.)
 3. In game: Video Settings > Shader Packs > Filmicsoft > Apply.
 
+## Compatibility
+
+- **Iris + Sodium** (Fabric): the main target; built and tested here.
+- **Fabulously Optimized**: works. The modpack ships Iris and Sodium, so
+  drop Filmicsoft into `shaderpacks/` as above. Other Fabric performance
+  mods (Lithium, FerriteCore, ImmediatelyFast, Entity Culling) don't affect
+  the pack.
+- **OptiFine**: should work but untested. The pack only uses the standard
+  shader-pack format (GLSL 330, no Iris-only features), which OptiFine also
+  reads.
+
 ## Layout
 
 - `pack/shaders/` - the shader pack itself (installed as `Filmicsoft` in `shaderpacks/`)
