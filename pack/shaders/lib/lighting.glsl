@@ -139,6 +139,11 @@ vec3 shadeSurface(vec3 albedoGamma, vec2 lm, vec3 nWS, float ao, float foliage, 
     float dayAmt = smoothstep(-0.10, 0.20, h);
     float warm = (1.0 - smoothstep(0.02, 0.50, h)) * dayAmt;   // sunrise / sunset
     float rain = rainStrength;
+    // Low sun: sun and sky light both scale from 0.40 at the horizon to 1 at
+    // noon, so the scene dims without the shadows turning black (same factor
+    // on both keeps the sun/sky ratio). Night is untouched.
+    float lowSun = 1.0 - smoothstep(0.0, 0.5, h);
+    float dayScale = mix(1.0, mix(1.0, 0.40, lowSun), dayAmt);
 
     // ---- Direct light (sun by day, moon by night) --------------------------
     vec3 direct = vec3(0.0);
@@ -155,16 +160,16 @@ vec3 shadeSurface(vec3 albedoGamma, vec2 lm, vec3 nWS, float ao, float foliage, 
         vec3 sunCol = mix(vec3(1.00, 0.93, 0.80), vec3(1.00, 0.48, 0.20), warm) * SUN_INTENSITY;
         vec3 moonCol = vec3(0.42, 0.55, 1.00) * 0.10 * MOON_BRIGHTNESS;
         vec3 directCol = mix(moonCol, sunCol, dayAmt) * (1.0 - 0.9 * rain);
-        direct = directCol * diff * open * mix(1.0, aoT, 0.5);
+        direct = directCol * diff * open * mix(1.0, aoT, 0.5) * dayScale;
     }
 
     // ---- Ambient: cool sky above, warm bounce below -----------------------
     vec3 ambient = vec3(0.0);
     if (hasSkylight) {
         vec3 ambDay = vec3(0.30, 0.37, 0.50);
-        vec3 ambSet = vec3(0.38, 0.31, 0.33);
+        vec3 ambSet = vec3(0.27, 0.33, 0.50);   // low sun: shade lit by the blue sky, against the orange sun
         vec3 ambNight = vec3(0.045, 0.060, 0.115) * MOON_BRIGHTNESS;
-        vec3 amb = mix(ambNight, mix(ambDay, ambSet, warm), dayAmt);
+        vec3 amb = mix(ambNight, mix(ambDay, ambSet, warm), dayAmt) * dayScale;
         amb = mix(amb, vec3(dot(amb, LIGHT_LUMA)) * 0.9, rain * 0.6) * (1.0 - 0.25 * rain);
         vec3 ground = amb * vec3(0.55, 0.50, 0.45);
         float hemi = nWS.y * 0.5 + 0.5;
