@@ -77,8 +77,8 @@ filmic image as possible **without GI or ray tracing**, and stay fast.
 ```sh
 tools/glcheck/run.sh          # compile check (macOS)
 tools/bench/run.sh            # per-pass GPU timing (macOS)
-scripts/install.sh            # install into the default game directory
-scripts/install.sh "/path/to/.minecraft"   # or another one (also: MINECRAFT_DIR)
+scripts/install.sh            # install into the Prism instance "26.3" (else the vanilla directory)
+scripts/install.sh "/path/to/.minecraft"   # or another one (also: MINECRAFT_DIR, PRISM_INSTANCE)
 ```
 
 Then in game: Video Settings > Shader Packs > Filmicsoft > Apply. After editing
