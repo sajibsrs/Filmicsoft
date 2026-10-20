@@ -10,13 +10,13 @@
 
 // ---- Grading ---------------------------------------------------------------
 #define EXPOSURE 1.00            // [0.50 0.60 0.70 0.80 0.90 1.00 1.10 1.20 1.30 1.40 1.50]
-#define CONTRAST 0.15            // [0.00 0.05 0.10 0.15 0.20 0.25 0.30 0.40 0.50]
+#define CONTRAST 0.30            // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.80 1.00]  1.00 = full S-curve
 #define BLACK_LIFT 0.010         // [0.000 0.010 0.015 0.025 0.040 0.060]
-#define SATURATION 1.00          // [0.00 0.25 0.50 0.60 0.70 0.80 0.90 1.00 1.10 1.20 1.30 1.50 1.75 2.00]
-#define VIBRANCE 0.40            // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00]
+#define SATURATION 0.90         // [0.00 0.25 0.50 0.60 0.70 0.80 0.90 1.00 1.10 1.20 1.30 1.50 1.75 2.00]
+#define VIBRANCE 0.20           // [0.00 0.10 0.20 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00]
 #define CHROMA_LIMIT 1.00        // [0.00 0.25 0.50 0.70 0.80 0.90 1.00]
 #define SHADOW_TINT 0.10         // [0.00 0.10 0.25 0.50 0.75 1.00]
-#define HIGHLIGHT_TINT 0.25      // [0.00 0.10 0.25 0.50 0.75 1.00]
+#define HIGHLIGHT_TINT 0.25    // [0.00 0.10 0.25 0.50 0.75 1.00]
 
 // ---- Calibration (Lightroom-style primary shifts) --------------------------
 // Red:   + toward orange, - toward magenta
@@ -67,13 +67,13 @@
 #define GRAIN_SPEED 24           // [0 6 10 16 24 36]  pattern changes per second (0 = still)
 
 // ---- Lighting (deferred, no shadow maps) -----------------------------------
-#define SUN_INTENSITY 1.50      // [0.00 0.25 0.50 0.75 1.00 1.10 1.20 1.35 1.50 1.75 2.00 2.50 3.00]
-#define AMBIENT_INTENSITY 1.10   // [0.00 0.25 0.50 1.00 1.10 1.20 1.25 1.40 1.50 1.75 2.00]
+#define SUN_INTENSITY 1.20     // [0.00 0.25 0.50 0.75 1.00 1.10 1.20 1.25 1.30 1.35 1.50 1.75 2.00]
+#define AMBIENT_INTENSITY 0.50 // [0.00 0.05 0.10 0.15 0.20 0.25 0.30 0.40 0.50 0.75 1.00]
 #define BLOCKLIGHT_INTENSITY 1.25 // [0.00 0.50 0.75 1.00 1.25 1.50 2.00]
 #define HIGHLIGHT_KNEE 0.45      // [0.30 0.40 0.50 0.55 0.60 0.70 0.80 0.90]  lower = earlier, softer rolloff
 #define EMISSIVE_GLOW 1.50       // [0.00 0.50 1.00 1.25 1.50 2.00 2.50 3.00]  lava, glowstone, lanterns, torches
 #define MOON_BRIGHTNESS 0.50    // [0.00 0.50 0.75 1.00 1.50 2.00 3.00]
-#define AO_STRENGTH 2.50         // [0.00 0.50 1.00 1.30 1.60 2.00 2.50 3.00 3.50 4.00 4.50 5.00]
+#define AO_STRENGTH 3.00        // [0.00 0.50 1.00 1.30 1.60 2.00 2.50 3.00 3.50 4.00 4.50 5.00]
 
 // ---- Shadows (only used when ENABLE_SHADOWS is on) -------------------------
 // Map covers SHADOW_DISTANCE blocks around the player; beyond it the sky-light
@@ -81,7 +81,7 @@
 #define SHADOW_DISTANCE 64       // [16 24 36 48 64 128]  blocks
 #define SHADOW_RESOLUTION 1024   // [256 512 1024 2048]
 #define SHADOW_FILTER 1          // [0 1 2 3]  edge quality: 0 hardware 2x2 only, 1 = 4 taps, 2 = 8 taps, 3 = 16 taps
-#define SHADOW_SOFTNESS 1.5      // [0.5 1.0 1.5 2.0 3.0]  blur radius of the shadow edge, in shadow-map texels
+#define SHADOW_SOFTNESS 1.0     // [0.5 1.0 1.5 2.0 3.0]  blur radius of the shadow edge, in shadow-map texels
 #define SHADOW_ENTITIES          // Mobs and items cast shadows too (every entity is drawn a second time: costs CPU)
 
 // ---- Atmosphere ------------------------------------------------------------

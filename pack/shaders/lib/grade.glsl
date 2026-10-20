@@ -94,7 +94,7 @@ vec3 gradeCore(vec3 col) {
     // Contrast: blend toward a smoothstep S-curve.
     vec3 sc = clamp(col, 0.0, 1.0);
     sc = sc * sc * (3.0 - 2.0 * sc);
-    col = mix(col, sc, CONTRAST * 2.0);
+    col = mix(col, sc, CONTRAST);
 
     // Color: primaries first, then per-band HSL mixer.
     col = clamp(calibrate(col), 0.0, 1.0);
