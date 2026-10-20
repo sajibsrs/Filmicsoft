@@ -7,6 +7,7 @@
 #define ENABLE_GODRAYS           // Light shafts and sun glare (half-res march inside the bloom pass; skipped when the sun is not in view)
 #define ENABLE_GRAIN             // Film grain
 #define ENABLE_FXAA              // Edge anti-aliasing (FXAA, one extra texture neighbourhood)
+#define ENABLE_WAVING            // Subtle wind sway on leaves, vines and grass (vertex shader only, costs ~nothing)
 #define ENABLE_SHADOWS           // Real sun/moon shadow map (extra geometry pass + filtered lookups; off = sky-light fake shadow)
 
 // ---- Grading ---------------------------------------------------------------
@@ -76,6 +77,9 @@
 #define MOON_BRIGHTNESS 0.50    // [0.00 0.50 0.75 1.00 1.50 2.00 3.00]
 #define SURFACE_SHEEN 25       // [0 25 50 100 150 200 300]  percent. View-dependent sun sheen on all surfaces (0 = off, flat Lambert look); strongest at grazing angles
 #define AO_STRENGTH 3.00        // [0.00 0.50 1.00 1.30 1.60 2.00 2.50 3.00 3.50 4.00 4.50 5.00]
+
+// ---- Wind (only used when ENABLE_WAVING is on) ----------------------------
+#define WAVING_STRENGTH 1.00     // [0.25 0.50 0.75 1.00 1.50 2.00]
 
 // ---- Shadows (only used when ENABLE_SHADOWS is on) -------------------------
 // Map covers SHADOW_DISTANCE blocks around the player; beyond it the sky-light

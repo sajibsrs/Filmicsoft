@@ -14,9 +14,24 @@ in vec4 mc_Entity;   // block id from block.properties, -1 if unlisted
 
 out vec2 texcoord;
 
+#if defined ENABLE_SHADOWS && defined ENABLE_WAVING
+uniform mat4 shadowModelView;
+uniform mat4 shadowModelViewInverse;
+#include "/lib/wave.glsl"
+#endif
+
 void main() {
+    texcoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;
 #ifdef ENABLE_SHADOWS
+#ifdef ENABLE_WAVING
+    // Same sway as the terrain pass, so shadows stay attached to the plants.
+    vec3 sv = (gl_ModelViewMatrix * gl_Vertex).xyz;
+    vec3 playerPos = mat3(shadowModelViewInverse) * sv + shadowModelViewInverse[3].xyz;
+    playerPos += waveOffset(playerPos + cameraPosition, int(mc_Entity.x), texcoord);
+    gl_Position = gl_ProjectionMatrix * (shadowModelView * vec4(playerPos, 1.0));
+#else
     gl_Position = ftransform();
+#endif
 #ifndef SHADOW_GRASS
     // Grass plants (10003): every vertex of the quad lands outside the clip
     // volume, so the quad is dropped before rasterizing and the alpha-test
@@ -26,5 +41,4 @@ void main() {
 #else
     gl_Position = vec4(2.0, 2.0, 2.0, 1.0);   // clipped: nothing is drawn if the pass runs anyway
 #endif
-    texcoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;
 }
