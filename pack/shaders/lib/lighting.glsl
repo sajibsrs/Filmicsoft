@@ -25,14 +25,6 @@ uniform sampler2DShadow shadowtex1;          // opaque casters only: glass and w
 uniform mat4 shadowModelView;
 uniform mat4 shadowProjection;
 
-#if SHADOW_FILTER == 1
-#define SHADOW_TAPS 4
-#elif SHADOW_FILTER == 2
-#define SHADOW_TAPS 8
-#else
-#define SHADOW_TAPS 16
-#endif
-
 // Shadow lookup for a surface at 'feet' (player space, i.e. relative to the camera).
 // Returns x = sunlight visibility (1 = lit), y = how much to trust it (0 = use the
 // fake sky-light shadow instead). y is 0 past the map, at sunset and at night.
@@ -53,22 +45,31 @@ vec2 shadowTerm(vec3 feet, vec3 nWS) {
     // One block of depth = 0.5 * |shadowProjection[2][2]| in map depth units.
     vec3 p = feet + nWS * texel * (0.8 + 1.6 * (1.0 - clamp(ndl, 0.0, 1.0)));
     vec3 sc = (shadowProjection * (shadowModelView * vec4(p, 1.0))).xyz * 0.5 + 0.5;
-    sc.z -= texel * (0.4 + 0.6 * slope * SHADOW_SOFTNESS) * 0.5 * abs(shadowProjection[2][2]);
+    // The depth bias keeps a floor of 0.5 so zero softness doesn't bring acne back.
+    sc.z -= texel * (0.4 + 0.6 * slope * max(SHADOW_SOFTNESS, 0.5)) * 0.5 * abs(shadowProjection[2][2]);
 
-#if SHADOW_FILTER == 0
+#if SHADOW_SAMPLES == 0
+    // Antialiasing off: sampling at a texel centre gives the 2x2 hardware filter
+    // full weight on one texel, so the edge is the raw shadow-map staircase.
+    sc.xy = (floor(sc.xy * float(SHADOW_RESOLUTION)) + 0.5) / float(SHADOW_RESOLUTION);
     float vis = texture(shadowtex1, sc);
 #else
-    // Rotated Vogel disk; per-pixel rotation trades banding for noise that
-    // film grain and FXAA hide.
-    float rot = 6.28318530718 * fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))));
-    float radius = SHADOW_SOFTNESS / float(SHADOW_RESOLUTION);
-    float vis = 0.0;
-    for (int i = 0; i < SHADOW_TAPS; i++) {
-        float a = float(i) * 2.39996323 + rot;
-        float r = sqrt((float(i) + 0.5) / float(SHADOW_TAPS)) * radius;
-        vis += texture(shadowtex1, vec3(sc.xy + r * vec2(cos(a), sin(a)), sc.z));
+    float vis;
+    if (SHADOW_SOFTNESS <= 0.0) {
+        vis = texture(shadowtex1, sc);   // no blur radius: just the hardware 2x2 filter
+    } else {
+        // Rotated Vogel disk; per-pixel rotation trades banding for noise that
+        // film grain and FXAA hide.
+        float rot = 6.28318530718 * fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))));
+        float radius = SHADOW_SOFTNESS / float(SHADOW_RESOLUTION);
+        vis = 0.0;
+        for (int i = 0; i < SHADOW_SAMPLES; i++) {
+            float a = float(i) * 2.39996323 + rot;
+            float r = sqrt((float(i) + 0.5) / float(SHADOW_SAMPLES)) * radius;
+            vis += texture(shadowtex1, vec3(sc.xy + r * vec2(cos(a), sin(a)), sc.z));
+        }
+        vis /= float(SHADOW_SAMPLES);
     }
-    vis /= float(SHADOW_TAPS);
 #endif
     return vec2(vis, w);
 }

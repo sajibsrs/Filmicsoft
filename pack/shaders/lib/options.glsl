@@ -80,8 +80,8 @@
 // fake shadow takes over (cross-faded). Texel size = 2 * distance / resolution.
 #define SHADOW_DISTANCE 64       // [16 24 36 48 64 128]  blocks
 #define SHADOW_RESOLUTION 1024   // [256 512 1024 2048]
-#define SHADOW_FILTER 1          // [0 1 2 3]  edge quality: 0 hardware 2x2 only, 1 = 4 taps, 2 = 8 taps, 3 = 16 taps
-#define SHADOW_SOFTNESS 1.0     // [0.5 1.0 1.5 2.0 3.0]  blur radius of the shadow edge, in shadow-map texels
+#define SHADOW_SAMPLES 8        // [0 1 2 4 8 16 32 64]  edge antialiasing taps: 0 = off (hard, stair-stepped); more = smoother, costs GPU
+#define SHADOW_SOFTNESS 0.5    // [0.0 0.5 1.0 1.5 2.0 3.0 4.0]  blur radius of the shadow edge, in shadow-map texels (0 = no blur)
 #define SHADOW_ENTITIES          // Mobs and items cast shadows too (every entity is drawn a second time: costs CPU)
 
 // ---- Atmosphere ------------------------------------------------------------
