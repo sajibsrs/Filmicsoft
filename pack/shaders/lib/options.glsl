@@ -91,10 +91,7 @@
 #define HAZE_AMOUNT 0.50         // [0.00 0.50 1.00 1.50 2.00]
 #define CLOUD_DISTANCE 5.0       // [2.0 3.0 4.0 5.0 6.0 8.0]  cloud fade length, in render distances (higher = clouds reach the horizon)
 #define HAZE_SUN_GLOW 0.50       // [0.00 0.25 0.50 0.75 1.00]
-#define GODRAY_STRENGTH 1.00     // [0.00 0.10 0.20 0.30 0.50 0.75 1.00 1.50 2.00]
-#define GODRAY_LIMIT 0.75        // [0.00 0.25 0.50 0.75 1.00]  rays add less over sky that is already bright, so the sky by the sun is not blown out (0 = off)
-#define GODRAY_GLARE 0.25        // [0.00 0.25 0.50 0.75 1.00]  glare over the sun's own quad (0 = vanilla sun untouched, 1 = same as the rest of the halo)
-#define GODRAY_LENGTH 0.80       // [0.30 0.50 0.65 0.80 0.90 1.00]  share of the way to the sun that each ray covers
+#define GODRAY_STRENGTH 0.50     // [0.00 0.10 0.20 0.30 0.50 0.75 1.00 1.50 2.00]
 #define GODRAY_SAMPLES 16        // [8 12 16 24 32]  taps per pixel at half resolution
 
 // ---- Debug (terrain only): 1 vertex color, 2 AO, 3 normals, 4 lightmap ----

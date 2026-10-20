@@ -61,15 +61,15 @@ vec3 godRays(vec2 uv) {
 
     float aspect = viewWidth / viewHeight;
     float d = length((uv - sunUV) * vec2(aspect, 1.0));
-    float falloff = exp(-d * 3.5);
+    float falloff = exp(-d * 1.75);
     // Dim the glare over the sun's own quad so vanilla's sun stays visible: the
     // quad is 30 blocks wide at 100 away, so its half-height on screen is
     // 0.15 * proj[1][1] / 2 (in height units). Inside that the glare drops to
-    // GODRAY_GLARE; just outside it the halo is at full strength.
+    // a quarter; just outside it the halo is at full strength.
     float discR = 0.075 * gbufferProjection[1][1];
-    falloff *= mix(GODRAY_GLARE, 1.0, smoothstep(0.6 * discR, 1.5 * discR, d));
+    falloff *= mix(0.25, 1.0, smoothstep(0.6 * discR, 1.5 * discR, d));
 
-    vec2 delta = (sunUV - uv) * GODRAY_LENGTH / float(GODRAY_SAMPLES);
+    vec2 delta = (sunUV - uv) / float(GODRAY_SAMPLES);   // march all the way to the sun
     // Per-pixel start offset turns step banding into noise that the upsample,
     // FXAA and film grain hide.
     float jitter = fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))));
@@ -89,7 +89,7 @@ vec3 godRays(vec2 uv) {
     // room the scene pixel has left, so the sky next to the sun stays natural
     // while rays over blue sky, clouds and shaded ground keep full strength.
     float sceneLuma = dot(texture(colortex0, uv).rgb, vec3(0.2126, 0.7152, 0.0722));
-    float headroom = mix(1.0, clamp((1.0 - sceneLuma) / 0.35, 0.0, 1.0), GODRAY_LIMIT);
+    float headroom = mix(1.0, clamp((1.0 - sceneLuma) / 0.35, 0.0, 1.0), 0.25);
 
     // Open sky sees an even glow, not shafts, so a sky pixel keeps only a
     // little of it; full rays show over terrain and clouds, where they read.

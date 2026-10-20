@@ -68,9 +68,6 @@ option.HAZE_AMOUNT=Distance Haze
 option.CLOUD_DISTANCE=Cloud Distance
 option.HAZE_SUN_GLOW=Sun Glow in Haze
 option.GODRAY_STRENGTH=God Ray Strength
-option.GODRAY_LIMIT=Sky Blowout Limit
-option.GODRAY_GLARE=Glare on Sun Disc
-option.GODRAY_LENGTH=God Ray Length
 option.GODRAY_SAMPLES=God Ray Quality (taps)
 option.DEBUG_VIEW=Debug View (0 off, 1 color, 2 AO, 3 normals, 4 light)
 
