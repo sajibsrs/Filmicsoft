@@ -8,6 +8,7 @@
 #define ENABLE_GRAIN             // Film grain
 #define ENABLE_FXAA              // Edge anti-aliasing (FXAA, one extra texture neighbourhood)
 #define ENABLE_WAVING            // Subtle wind sway on leaves, vines and grass (vertex shader only, costs ~nothing)
+#define ENABLE_WATER_RIPPLES     // Blocky wind ripples in the water's sky reflection (~0.05 ms worst case)
 #define ENABLE_SHADOWS           // Real sun/moon shadow map (extra geometry pass + filtered lookups; off = sky-light fake shadow)
 
 // ---- Grading ---------------------------------------------------------------
