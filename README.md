@@ -39,7 +39,24 @@ filmic image as possible **without GI or ray tracing**, and stay fast.
   G-buffer, no deferred pass) and bloom runs at low resolution, keeping
   memory use and bandwidth low; that also matters on laptops and integrated GPUs.
 
-## What's new in 2.0.0
+## What's new in 2.1.0
+
+- **A world that moves.** Waving plants, sky scattering (deeper blue overhead,
+  warm glow around the sun), sun-lit clouds and a horizon mist, a rain mood
+  with wet ground, water that reflects the sky with blocky ripples, and an
+  underwater look with absorption, teal fog and caustics.
+- **Golden mornings and evenings.** Sun and sky dim together toward the horizon
+  and the low sun turns gold. Sun Strength now defaults to 2.0 (range 1.0 to
+  3.0) and the shadow map to 36 blocks.
+- **Colour grading presets.** Pick a tone-colour preset and how strongly it
+  tints shadows, midtones and highlights.
+- **A shorter menu.** Settings that were tuned and settled are now fixed, so the
+  menu keeps only what people adjust: effect switches, Environment, Lighting,
+  Shadows, Grading. The colour mixer and calibration are gone. If you had saved
+  values for removed options, they are ignored and the shipped look is used.
+- **Fast.** Post-processing costs about 1.2 ms at 1080p on an Apple M4.
+
+### 2.0.0
 
 - **Real shadows, on by default.** A shadow map with soft, filtered edges.
   Distance, resolution, and whether mobs and grass cast shadows are options.
