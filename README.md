@@ -1,8 +1,9 @@
 # Filmicsoft
 
-A lightweight, cinematic post-processing shader pack for Minecraft: Java Edition
-(Iris + Sodium). Soft diffusion, bloom, Lightroom-style color grading, chromatic
-fringe and film grain. Written for GLSL 330 so it runs on macOS (OpenGL 4.1),
+An extremely high-performance cinematic shader pack for Minecraft: Java Edition
+(Iris + Sodium). Real sun and moon shadows, atmospheric haze, soft diffusion,
+bloom, Lightroom-style color grading and film grain, at frame rates well above
+what you would expect for this look. Written for GLSL 330 so it runs on macOS (OpenGL 4.1),
 Windows and Linux: no compute shaders, no SSBOs.
 
 | Vanilla | Filmicsoft |
@@ -18,10 +19,12 @@ ray tracing or path tracing. Those look great but cost a lot of frame time and
 need a strong GPU. Filmicsoft goes the other way: get as close to a realistic,
 filmic image as possible **without GI or ray tracing**, and stay fast.
 
-- **Performance first.** Every pass is measured on the GPU (`tools/bench`, see
-  `BENCHMARK.md`) and kept only if it earns its cost. The post-processing chain
-  adds about 1.2 ms per frame at 1080p on an Apple M4; the shadow map is extra
-  and can be turned off or made cheaper (see Options).
+- **Extreme performance.** Surfaces are lit in a single forward pass and every
+  pass is measured on the GPU (`tools/bench`, see `BENCHMARK.md`) and kept only
+  if it earns its cost. The post-processing chain adds about 1.2 ms per frame at
+  1080p on an Apple M4, and in side-by-side play it holds noticeably higher
+  frame rates than packs marketed as ultra-light. The shadow map is extra and
+  can be turned off or made cheaper (see Options).
 - **Realism from cheap tricks.** Forward lighting with a soft sun/moon, sky
   ambient and warm torch light, and a real filtered shadow map for the sun and
   moon (with a sky-light fake as the fallback when it is off or out of range).
@@ -39,14 +42,13 @@ filmic image as possible **without GI or ray tracing**, and stay fast.
 ## What's new in 2.0.0
 
 - **Real shadows, on by default.** A shadow map with soft, filtered edges.
-  Distance, resolution, filter quality, softness and whether mobs cast shadows
-  are all options. Turn `ENABLE_SHADOWS` off for the cheap sky-light version.
+  Distance, resolution, and whether mobs and grass cast shadows are options.
+  Turn `ENABLE_SHADOWS` off for the cheap sky-light version.
 - **Emissive glow per texel.** Lantern glass, flames and lava glow; the dark
   metal frame of a lantern or the stick of a torch no longer does.
-- **Highlight rolloff and retuned light.** Sun 1.50 and ambient 1.10 keep sand,
+- **Highlight rolloff and retuned light.** A softer highlight curve keeps sand,
   snow and other pale blocks textured instead of blowing out to flat cream.
 - **Fewer fullscreen passes** (two bloom passes instead of three).
-- **Cloud Distance slider.**
 
 ## Install
 

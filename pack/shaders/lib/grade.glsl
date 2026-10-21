@@ -85,6 +85,48 @@ vec3 calibrate(vec3 c) {
 }
 
 // Everything from black lift to global saturation, for a colour in 0..1.
+// Tone colour presets: each GRADE_PRESET index sets the colour of the shadows,
+// midtones and highlights. Labels are in lang/en_us.lang. Neutral grey tints
+// nothing. GRADE_STRENGTH scales how strongly the ranges are tinted.
+const vec3 PRESET_SHADOW[8] = vec3[8](
+    vec3(0.5020, 0.5020, 0.5020),   // 0 None
+    vec3(0.1255, 0.7686, 0.7843),   // 1 Teal & Orange
+    vec3(0.6275, 0.4706, 0.3529),   // 2 Warm Film
+    vec3(0.4235, 0.5490, 0.6588),   // 3 Cool Blue
+    vec3(0.2941, 0.3725, 0.8196),   // 4 Golden Hour
+    vec3(0.5412, 0.3608, 0.8392),   // 5 Rose Dusk
+    vec3(0.1020, 0.6510, 0.6510),   // 6 Forest
+    vec3(0.2941, 0.3725, 0.8196)   // 7 Neon
+);
+
+const vec3 PRESET_MID[8] = vec3[8](
+    vec3(0.5020, 0.5020, 0.5020),   // 0 None
+    vec3(0.5020, 0.5020, 0.5020),   // 1 Teal & Orange
+    vec3(1.0000, 0.8196, 0.4000),   // 2 Warm Film
+    vec3(0.2471, 0.4980, 0.8784),   // 3 Cool Blue
+    vec3(1.0000, 0.6039, 0.2353),   // 4 Golden Hour
+    vec3(1.0000, 0.4784, 0.6039),   // 5 Rose Dusk
+    vec3(0.2980, 0.6902, 0.3137),   // 6 Forest
+    vec3(0.7529, 0.3137, 0.7529)   // 7 Neon
+);
+
+const vec3 PRESET_HIGH[8] = vec3[8](
+    vec3(0.5020, 0.5020, 0.5020),   // 0 None
+    vec3(1.0000, 0.6039, 0.2353),   // 1 Teal & Orange
+    vec3(1.0000, 0.8196, 0.4000),   // 2 Warm Film
+    vec3(0.3608, 0.7843, 0.9412),   // 3 Cool Blue
+    vec3(1.0000, 0.8196, 0.4000),   // 4 Golden Hour
+    vec3(1.0000, 0.6039, 0.2353),   // 5 Rose Dusk
+    vec3(1.0000, 0.8196, 0.4000),   // 6 Forest
+    vec3(0.1255, 0.7686, 0.7843)   // 7 Neon
+);
+
+// Luminance-preserving tint direction for a colour: how it differs from the
+// grey of the same brightness.
+vec3 toneChroma(vec3 c) {
+    return c - vec3(dot(c, LUMA));
+}
+
 vec3 gradeCore(vec3 col) {
     // Black lift + soft highlight shoulder (scene is display-referred, so this
     // is a gentle curve rather than a full HDR tone map).
@@ -106,12 +148,16 @@ vec3 gradeCore(vec3 col) {
     hsv.y = softLimit(hsv.y, CHROMA_LIMIT);
     col = hsv2rgb(hsv);
 
-    // Split toning: cyan shadows, orange highlights.
+    // Tone colours: each range (shadows, midtones, highlights) gets its preset
+    // colour added in proportion to its mask and GRADE_STRENGTH. 0.06 scales a
+    // preset colour's chroma (up to ~0.7) down to a gentle shift at strength 1.0.
     float luma = dot(col, LUMA);
     float shadowMask = 1.0 - smoothstep(0.0, 0.5, luma);
     float highlightMask = smoothstep(0.5, 1.0, luma);
-    col += vec3(-0.030, 0.022, 0.030) * SHADOW_TINT * shadowMask;
-    col += vec3(0.040, 0.018, -0.035) * HIGHLIGHT_TINT * highlightMask;
+    float midMask = 1.0 - shadowMask - highlightMask;
+    col += toneChroma(PRESET_SHADOW[GRADE_PRESET]) * (GRADE_STRENGTH * 0.06) * shadowMask;
+    col += toneChroma(PRESET_MID[GRADE_PRESET]) * (GRADE_STRENGTH * 0.06) * midMask;
+    col += toneChroma(PRESET_HIGH[GRADE_PRESET]) * (GRADE_STRENGTH * 0.06) * highlightMask;
 
     // Global saturation.
     luma = dot(col, LUMA);

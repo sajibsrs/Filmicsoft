@@ -137,7 +137,7 @@ vec3 shadeSurface(vec3 albedoGamma, vec2 lm, vec3 nWS, float ao, float foliage, 
     // Time of day: h = sun height (+ day, - night).
     float h = sin(sunAngle * 6.28318530718);
     float dayAmt = smoothstep(-0.10, 0.20, h);
-    float warm = (1.0 - smoothstep(0.02, 0.50, h)) * dayAmt;   // sunrise / sunset
+    float warm = (1.0 - smoothstep(0.02, 0.60, h)) * dayAmt;   // sunrise / sunset
     float rain = rainStrength;
     // Low sun: sun and sky light both scale from 0.40 at the horizon to 1 at
     // noon, so the scene dims without the shadows turning black (same factor
@@ -157,7 +157,7 @@ vec3 shadeSurface(vec3 albedoGamma, vec2 lm, vec3 nWS, float ao, float foliage, 
         // Fake shadow from the sky-light level: open sky is 15, one leaf
         // layer or an overhang above drops it to 14 (0.935), which is shade.
         float open = sunOpen(sky, sh);
-        vec3 sunCol = mix(vec3(1.00, 0.93, 0.80), vec3(1.00, 0.48, 0.20), warm) * SUN_INTENSITY;
+        vec3 sunCol = mix(vec3(1.00, 0.93, 0.80), vec3(1.00, 0.58, 0.22), warm) * SUN_INTENSITY;
         vec3 moonCol = vec3(0.42, 0.55, 1.00) * 0.10 * MOON_BRIGHTNESS;
         vec3 directCol = mix(moonCol, sunCol, dayAmt) * (1.0 - 0.9 * rain);
         direct = directCol * diff * open * mix(1.0, aoT, 0.5) * dayScale;
@@ -225,7 +225,7 @@ vec3 sunSheen(vec3 nWS, vec3 feet, float sky, vec2 sh) {
     float ndh = max(dot(nWS, normalize(L + V)), 0.0);
     float grazing = pow(1.0 - clamp(dot(nWS, V), 0.0, 1.0), 2.0);
     float lit = smoothstep(0.0, 0.25, dot(nWS, L));
-    float warm = (1.0 - smoothstep(0.02, 0.50, h)) * dayAmt;
+    float warm = (1.0 - smoothstep(0.02, 0.60, h)) * dayAmt;
     vec3 sunCol = mix(vec3(1.00, 0.93, 0.80), vec3(1.00, 0.48, 0.20), warm);
     return sunCol * pow(ndh, 6.0) * (0.30 + 0.70 * grazing) * lit * vis * (0.45 * float(SURFACE_SHEEN) * 0.01);
 #else

@@ -97,6 +97,13 @@ Harness after the change (1920x1022, best of 15): terrain layer + post chain
 2.53 -> 1.35 ms with defaults, 1.04 -> 0.55 ms with everything off. In-game,
 same spot, everything on (shadows included): ~150 -> ~170 FPS (6.7 -> 5.9 ms).
 
+Harness, current defaults (2026-10-21, Apple M4, 1920x1080, best of 15):
+terrain layer 0.88 ms, bloom passes 0.10 + 0.09, final 0.96, post chain 1.15,
+post chain + terrain layer 2.03. The terrain layer is higher than in the
+deferred-era table above because lighting and the shadow-map lookups now run in
+the geometry pass; the post chain is unchanged. The harness draws terrain as one
+fullscreen layer and does not include the shadow pass.
+
 ### Projected FPS impact
 
 FPS is nonlinear, so convert to frame time:

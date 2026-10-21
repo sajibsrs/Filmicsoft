@@ -45,7 +45,7 @@ vec3 litSurface(vec3 albedoGamma, vec2 lm, vec3 nWS, float ao, float foliage, fl
     // drifting web of light on whatever is below. Blocky (1/4-block cells) to
     // match the pixel look; only where sky light still reaches (it drops with
     // depth), by day, and not on the hand.
-#ifdef ENABLE_UNDERWATER
+#ifdef ENABLE_CAUSTICS
     if (isEyeInWater == 1 && hasSkylight && useShadowMap) {
         float h = sin(sunAngle * 6.28318530718);
         // Sky light falls about a level per block of water, so a seabed a few
