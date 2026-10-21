@@ -44,9 +44,9 @@ vec3 skyGradient(vec3 viewDir) {
         sky = mix(sky, sky * vec3(0.88, 0.94, 1.05), (1.0 - sd) * lowSun * 0.60 * k);
     }
     // Thunder: vanilla takes the sky (and so the haze) almost to black, where
-    // the storm curtain can't be told from dark terrain. The same cool-grey
-    // floor as the rain drops (lib/rain.glsl). Added to the sky itself, not
-    // only to the fog, so fully fogged terrain still matches the sky behind it.
+    // the storm curtain can't be told from dark terrain. A small cool-grey floor,
+    // added to the sky itself, not only to the fog, so fully fogged terrain still
+    // matches the sky behind it.
     if (hasSkylight) sky += vec3(0.050, 0.058, 0.075) * thunderStrength * RAIN_MOOD;
     return sky;
 }
