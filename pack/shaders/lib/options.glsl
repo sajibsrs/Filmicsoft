@@ -44,11 +44,13 @@
 // Map covers SHADOW_DISTANCE blocks around the player; beyond it the sky-light
 // fake shadow takes over (cross-faded). Texel size = 2 * distance / resolution.
 #define SHADOW_DISTANCE 36       // [16 24 36 48 64 128]  blocks
-#define SHADOW_RESOLUTION 1024   // [256 512 1024 2048]
+#define SHADOW_RESOLUTION 1024   // [256 512 1024 2048 4096]
+#define SHADOW_SAMPLES 4        // [0 1 2 4 8 16 32 64]  edge antialiasing taps: 0 = off (hard, stair-stepped); more = smoother, costs GPU
 #define SHADOW_ENTITIES          // Mobs and items cast shadows too (every entity is drawn a second time: costs CPU)
 #define SHADOW_GRASS             // Grass and ferns cast shadows (dense fields put many extra cutout quads in the shadow map: costs GPU)
 
 // ---- Atmosphere ------------------------------------------------------------
+#define WAVING_STRENGTH 1.00     // [0.25 0.50 0.75 1.00 1.50 2.00]  only used when ENABLE_WAVING is on
 #define HAZE_AMOUNT 0.50         // [0.00 0.50 1.00 1.50 2.00]
 #define RAIN_MOOD 1.00           // [0.00 0.50 1.00 1.50 2.00]  rain look: cooler, flatter colour, thicker haze, wet darker ground (0 = vanilla-like rain)
 
@@ -95,8 +97,6 @@
 #define EMISSIVE_GLOW 1.50  // lava, glowstone, lanterns, torches
 #define SURFACE_SHEEN 25  // percent. View-dependent sun sheen on all surfaces (0 = off, flat Lambert look); strongest at grazing angles
 #define AO_STRENGTH 3.00
-#define WAVING_STRENGTH 1.00
-#define SHADOW_SAMPLES 4  // edge antialiasing taps: 0 = off (hard, stair-stepped); more = smoother, costs GPU
 #define SHADOW_SOFTNESS 0.5  // blur radius of the shadow edge, in shadow-map texels (0 = no blur)
 #define CLOUD_DISTANCE 5.0  // cloud fade length, in render distances (higher = clouds reach the horizon)
 #define HAZE_SUN_GLOW 0.50
