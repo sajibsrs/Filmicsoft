@@ -25,11 +25,12 @@ layout(location = 0) out vec4 outColor;
 #ifdef ENABLE_WATER_RIPPLES
 // Wind ripples: every 1/4-block cell (4x4 water-texture pixels) gets its own
 // small random tilt that slowly changes, and the whole pattern drifts with the
-// wind. Blocky like vanilla's own water animation, with no long smooth waves
-// (those read as HD-ocean stripes, not Minecraft).
-vec2 rippleSlope(vec2 xz) {
+// wind (or downstream, on flowing water). Blocky like vanilla's own water
+// animation, with no long smooth waves (those read as HD-ocean stripes, not
+// Minecraft).
+vec2 rippleSlope(vec2 xz, vec2 drift) {
     float t = frameTimeCounter;
-    vec2 cell = floor((xz + vec2(0.31, 0.19) * t) * 4.0);    // 4x4 texture pixels per cell; drift with the wind
+    vec2 cell = floor((xz + drift * t) * 4.0);    // 4x4 texture pixels per cell
     // One cheap hash per cell gives each cell its own phase; two detuned sines
     // then rock its tilt back and forth. (Interleaved gradient noise was tried
     // here: on a regular grid it shows as a diagonal mosaic.) The mod keeps
@@ -61,8 +62,17 @@ void main() {
         float dist = length(viewPos);
         vec3 wp = mat3(gbufferModelViewInverse) * viewPos + gbufferModelViewInverse[3].xyz + cameraPosition;
         float calm = 1.0 - smoothstep(12.0, 40.0, dist);
-        vec2 g = rippleSlope(wp.xz) * calm * (1.0 + rainStrength);
-        nWS = normalize(vec3(-g.x, 1.0, -g.y));
+        // Flowing water's top face tilts downhill, so its normal points the
+        // way the water runs. Sloped water carries the ripples downstream
+        // instead of with the wind; steep drops fade them out, since fast
+        // water already shows vanilla's flow texture.
+        vec2 down = -nWS.xz;
+        float slope = length(down);
+        float flowing = smoothstep(0.02, 0.12, slope);
+        vec2 drift = mix(vec2(0.31, 0.19), down / max(slope, 1e-4) * 1.2, flowing);
+        calm *= 1.0 - smoothstep(0.20, 0.50, slope);
+        vec2 g = rippleSlope(wp.xz, drift) * calm * (1.0 + rainStrength);
+        nWS = normalize(nWS + vec3(-g.x, 0.0, -g.y));   // on top of the face's own tilt, so slopes keep it
 #endif
         // Everything below works in player space, where up is +y.
         vec3 Vp = mat3(gbufferModelViewInverse) * V;
