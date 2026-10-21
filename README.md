@@ -129,7 +129,6 @@ files, press R in the shader screen (or re-apply) to reload. Check
 Tested: Minecraft 26.3, Fabric, Iris 1.11.7, Sodium 0.9.2, macOS (Apple Silicon),
 on the official launcher through Prism.
 Not yet tested: Windows, Linux.
-Planned: presets, optional cheap SSAO, light shafts.
 
 ## License
 
