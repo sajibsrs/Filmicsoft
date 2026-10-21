@@ -93,7 +93,17 @@ vec3 godRays(vec2 uv) {
 
     // Open sky sees an even glow, not shafts, so a sky pixel keeps only a
     // little of it; full rays show over terrain and clouds, where they read.
-    float selfSky = texture(depthtex0, uv).r >= 1.0 ? 0.35 : 1.0;
+    // The sky fraction is averaged over a small ring rather than read at the
+    // pixel, otherwise the 0.35 / 1.0 step lands on every silhouette (distant
+    // trees) and shows up as a bright outline once the shafts are strong.
+    vec2 ring = 3.0 / vec2(viewWidth, viewHeight);
+    float skyFrac = 0.0;
+    for (int i = 0; i < 8; i++) {
+        float a = float(i) * 0.78539816;
+        skyFrac += texture(depthtex0, uv + vec2(cos(a), sin(a)) * ring).r >= 1.0 ? 1.0 : 0.0;
+    }
+    skyFrac = (skyFrac + (texture(depthtex0, uv).r >= 1.0 ? 1.0 : 0.0)) / 9.0;
+    float selfSky = mix(1.0, 0.35, smoothstep(0.0, 1.0, skyFrac));
 
     return tint * (open * falloff * onScreen * amount * GODRAY_STRENGTH * headroom * selfSky);
 }

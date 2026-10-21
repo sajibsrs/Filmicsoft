@@ -98,7 +98,7 @@
 #define HAZE_SUN_GLOW 0.50       // [0.00 0.25 0.50 0.75 1.00]
 #define SKY_SCATTER 1.00         // [0.00 0.25 0.50 0.75 1.00 1.25 1.50 2.00]  deeper blue overhead, warm glow around the sun (0 = plain vanilla gradient)
 #define RAIN_MOOD 1.00           // [0.00 0.50 1.00 1.50 2.00]  rain look: cooler, flatter colour, thicker haze, wet darker ground (0 = vanilla-like rain)
-#define GODRAY_STRENGTH 0.50     // [0.00 0.10 0.20 0.30 0.50 0.75 1.00 1.50 2.00]
+#define GODRAY_STRENGTH 1.00     // [0.00 0.10 0.20 0.30 0.50 0.75 1.00 1.50 2.00]
 #define GODRAY_SAMPLES 16        // [8 12 16 24 32]  taps per pixel at half resolution
 
 // ---- Debug (terrain only): 1 vertex color, 2 AO, 3 normals, 4 lightmap ----
