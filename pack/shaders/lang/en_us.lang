@@ -81,6 +81,7 @@ option.ENABLE_HAZE=Atmosphere & Haze
 option.ENABLE_GODRAYS=God Rays
 option.ENABLE_WAVING=Waving Plants
 option.ENABLE_WATER_RIPPLES=Water Ripples
+option.ENABLE_UNDERWATER=Underwater Look
 option.ENABLE_GRAIN=Film Grain
 option.ENABLE_FXAA=Anti-Aliasing (FXAA)
 

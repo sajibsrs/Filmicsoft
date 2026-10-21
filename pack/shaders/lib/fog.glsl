@@ -32,7 +32,25 @@ vec3 applyAtmosphere(vec3 scene, vec3 viewPos, bool isSky) {
     float fogAmt = 0.0;
 
     if (isEyeInWater == 1) {
+#ifdef ENABLE_UNDERWATER
+        // Water eats red first, then green, and blue last: distant things go
+        // blue-green before they fade into the water colour.
+        scene *= exp(-dist * vec3(0.065, 0.022, 0.008));
+        fogAmt = 1.0 - exp(-dist * 0.026);
+        // Vanilla's water colour is an almost pure ultramarine, which no channel
+        // scaling can turn into water. Use a fixed teal hue instead, at the
+        // brightness vanilla's fog has (so it still follows the time of day
+        // and the biome's depth feel), blended 50% so a hint of the biome's
+        // own water colour stays.
+        float wb = max(max(fogColor.r, fogColor.g), fogColor.b);
+        // Vanilla's underwater fog goes dark quickly in dim light, so a sunlit
+        // shallows ends up far darker than the water seen from above. A daylight
+        // floor (scaled by sky access, so caves and night still go dark).
+        wb = max(wb, hasSkylight ? 0.40 * smoothstep(-0.10, 0.20, sin(sunAngle * 6.28318530718)) * skyEye : 0.0);
+        fogCol = mix(fogColor, vec3(0.20, 0.80, 0.95) * wb * 1.1, 0.50);
+#else
         fogAmt = 1.0 - exp(-dist * 0.035);
+#endif
     } else if (isEyeInWater == 2) {
         fogAmt = 1.0 - exp(-dist * 0.45);
     } else if (!isSky) {
