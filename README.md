@@ -6,11 +6,10 @@ bloom, Lightroom-style color grading and film grain, at frame rates well above
 what you would expect for this look. Written for GLSL 330 so it runs on macOS (OpenGL 4.1),
 Windows and Linux: no compute shaders, no SSBOs.
 
-| Vanilla | Filmicsoft |
+| | |
 |---|---|
-| ![Village, vanilla](docs/images/village-vanilla.webp) | ![Village, Filmicsoft](docs/images/village-filmicsoft.webp) |
-| ![Jungle, vanilla](docs/images/jungle-vanilla.webp) | ![Jungle, Filmicsoft](docs/images/jungle-filmicsoft.webp) |
-| ![Desert, vanilla](docs/images/desert-vanilla.webp) | ![Desert, Filmicsoft](docs/images/desert-filmicsoft.webp) |
+| ![Desert village by the river](docs/images/desert-river.webp) | ![Sunrise with light shafts](docs/images/sunrise.webp) |
+| ![Underwater](docs/images/underwater.webp) | ![Village in a valley](docs/images/valley.webp) |
 
 ## Why Filmicsoft
 
