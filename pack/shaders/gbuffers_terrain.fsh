@@ -1,6 +1,6 @@
 #version 330 compatibility
 
-// Terrain (also block entities and damage overlay via Iris fallbacks).
+// Terrain (also block entities via Iris fallbacks).
 // Lit right here (forward shading, see lib/surface.glsl).
 // shaders.properties sets separateAo=true, so for terrain: rgb = biome tint,
 // a = vertex ambient occlusion.
@@ -14,7 +14,6 @@
 
 uniform sampler2D gtexture;
 uniform float alphaTestRef;
-uniform int renderStage;
 
 in vec2 texcoord;
 in vec2 lmcoord;
@@ -29,12 +28,6 @@ layout(location = 0) out vec4 outColor;
 void main() {
     vec4 tex = texture(gtexture, texcoord);
     if (tex.a < alphaTestRef) discard;
-
-    // Block-breaking cracks multiply onto the already lit block: keep them unlit.
-    if (renderStage == MC_RENDER_STAGE_DESTROY) {
-        outColor = tex * glcolor;
-        return;
-    }
 
     vec3 n = normalize(normal);
     vec2 lm = clamp(lmcoord, 0.0, 1.0);
