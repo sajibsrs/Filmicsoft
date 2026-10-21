@@ -15,6 +15,13 @@ vec3 skyGradient(vec3 viewDir) {
     // that the pale horizon never reads as a separate band.
     float t = exp(-up * 2.5);
     vec3 sky = mix(skyColor, horizon, t);
+    // Horizon mist (HORIZON_MIST): the low band turns pale and desaturated, like
+    // vanilla's haze, so far clouds and terrain dissolve into it instead of
+    // ending against clear blue. Built from the sky itself: fogColor is almost
+    // the sky's blue at dusk and dawn, so it cannot supply the paleness.
+    float skyLum = dot(sky, vec3(0.2126, 0.7152, 0.0722));
+    vec3 mistCol = mix(vec3(skyLum), sky, 0.35) * 1.25 + 0.04;
+    sky = mix(sky, mistCol, clamp(exp(-up * 4.5) * HORIZON_MIST * 0.85, 0.0, 1.0));
 
     // Scattering look (SKY_SCATTER, 0 = plain gradient above). Overworld only;
     // rain flattens it back to the plain gradient.

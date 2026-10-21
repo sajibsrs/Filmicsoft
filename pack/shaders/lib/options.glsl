@@ -65,7 +65,7 @@
 #define CHROMA_FRINGE 0.05       // [0.00 0.05 0.10 0.15 0.25 0.40]
 
 // ---- Grain (size is relative to a 1080p screen so Retina looks the same) ---
-#define GRAIN_AMOUNT 0.0075       // [0.000 0.0025 0.005 0.0075 0.010 0.025 0.05 0.1]
+#define GRAIN_AMOUNT 0.005        // [0.000 0.0025 0.005 0.0075 0.010]
 #define GRAIN_SIZE 4.0           // [1.0 1.5 2.2 3.0 4.0 5.0 6.0 8.0 10.0]
 #define GRAIN_SPEED 24           // [0 6 10 16 24 36]  pattern changes per second (0 = still)
 
@@ -103,3 +103,7 @@
 
 // ---- Debug (terrain only): 1 vertex color, 2 AO, 3 normals, 4 lightmap ----
 #define DEBUG_VIEW 0             // [0 1 2 3 4]
+
+// Fixed look, not exposed as sliders.
+#define CLOUD_LIGHTING 1.00      // sun-angle shading of clouds, warm sides and undersides at sunrise / sunset
+#define HORIZON_MIST 0.60        // pale haze band where the sky meets the horizon (far clouds and terrain fade into it)
