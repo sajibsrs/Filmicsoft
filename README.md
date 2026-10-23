@@ -38,7 +38,18 @@ filmic image as possible **without GI or ray tracing**, and stay fast.
   G-buffer, no deferred pass) and bloom runs at low resolution, keeping
   memory use and bandwidth low; that also matters on laptops and integrated GPUs.
 
-## What's new in 2.1.0
+## What's new in 2.1.1
+
+- **Block-breaking cracks fixed.** Mining a block showed opaque dark and orange
+  blotches instead of cracks. The crack overlay now has its own program and
+  blends like vanilla, so the block shows through.
+- **Shadow Antialiasing Samples** (Shadows page): 0 for hard edges, up to 64
+  for very smooth ones. Default stays 4. Shadow resolution now goes up to 4096.
+- **Wind Strength** (Environment page): how far plants sway when Waving is on.
+  Default stays 1.0.
+- Rain Mood is renamed **Rain Atmosphere**.
+
+### 2.1.0
 
 - **A world that moves.** Waving plants, sky scattering (deeper blue overhead,
   warm glow around the sun), sun-lit clouds and a horizon mist, a rain mood
