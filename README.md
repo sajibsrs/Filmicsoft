@@ -32,8 +32,8 @@ filmic image as possible **without GI or ray tracing**, and stay fast.
 - **Runs on macOS.** Most shader packs need OpenGL features that macOS doesn't
   have (it stops at OpenGL 4.1), so they fail to load or render wrong on Macs.
   Filmicsoft is written for GLSL 330: no compute shaders, no SSBOs. It is
-  built and tested on Apple Silicon, and should work the same on Windows and
-  Linux.
+  built on Apple Silicon and tested on macOS and Windows, and should work the
+  same on Linux.
 - **Light on your system.** Surfaces are lit where they are drawn (no
   G-buffer, no deferred pass) and bloom runs at low resolution, keeping
   memory use and bandwidth low; that also matters on laptops and integrated GPUs.
@@ -137,9 +137,9 @@ files, press R in the shader screen (or re-apply) to reload. Check
 
 ## Status
 
-Tested: Minecraft 26.3, Fabric, Iris 1.11.7, Sodium 0.9.2, macOS (Apple Silicon),
-on the official launcher through Prism.
-Not yet tested: Windows, Linux.
+Tested: Minecraft 26.3, Fabric, Iris 1.11.7, Sodium 0.9.2, on macOS (Apple
+Silicon, official launcher through Prism) and Windows.
+Not yet tested: Linux.
 
 ## License
 
