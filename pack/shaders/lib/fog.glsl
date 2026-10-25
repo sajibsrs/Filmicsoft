@@ -8,7 +8,6 @@
 // The #ifdef ENABLE_HAZE in applyAtmosphere keeps the menu toggle listed.
 
 uniform vec3 skyColor;
-uniform vec3 sunPosition;
 uniform vec3 upPosition;
 uniform float far;
 uniform float blindness;

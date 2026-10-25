@@ -9,6 +9,7 @@
 
 uniform float sunAngle;
 uniform vec3 shadowLightPosition;
+uniform vec3 sunPosition;   // the real sun; shadowLightPosition flips to the moon at tick ~23215, after the sun is already up
 uniform mat4 gbufferModelViewInverse;
 uniform float rainStrength;
 uniform bool hasSkylight;
@@ -20,6 +21,7 @@ const int shadowMapResolution = SHADOW_RESOLUTION;
 const float shadowDistance = SHADOW_DISTANCE;
 const float shadowDistanceRenderMul = 1.0;   // don't draw terrain beyond shadowDistance into the map
 const bool shadowHardwareFiltering = true;   // shadowtex1 becomes a sampler2DShadow (free 2x2 PCF)
+const float sunPathRotation = -25.0;          // tilt the sun path off the world axes (avoids sun running along walls)
 
 uniform sampler2DShadow shadowtex1;          // opaque casters only: glass and water don't shadow
 uniform mat4 shadowModelView;
@@ -38,15 +40,25 @@ vec2 shadowTerm(vec3 feet, vec3 nWS) {
 
     vec3 L = normalize(mat3(gbufferModelViewInverse) * shadowLightPosition);
     float ndl = dot(nWS, L);
-    float texel = 2.0 * SHADOW_DISTANCE / float(SHADOW_RESOLUTION);   // blocks per shadow texel
+    // The map is warped toward the player (shadow.vsh does the same): xy is divided
+    // by f, so texels near the camera are 1/(1-SHADOW_WARP) times denser than the
+    // uniform grid, and 'texel' below is the local size here.
+    vec2 ndcFeet = (shadowProjection * (shadowModelView * vec4(feet, 1.0))).xy;
+    float warpF = length(ndcFeet) * SHADOW_WARP + (1.0 - SHADOW_WARP);
+    float texel = 2.0 * SHADOW_DISTANCE / float(SHADOW_RESOLUTION) * warpF * warpF / (1.0 - SHADOW_WARP);   // blocks per shadow texel here
     float slope = min(sqrt(max(1.0 - ndl * ndl, 0.0)) / max(ndl, 0.15), 4.0);
 
     // Normal offset (kills acne on faces that graze the light) + slope-scaled depth bias.
     // One block of depth = 0.5 * |shadowProjection[2][2]| in map depth units.
     vec3 p = feet + nWS * texel * (0.8 + 1.6 * (1.0 - clamp(ndl, 0.0, 1.0)));
-    vec3 sc = (shadowProjection * (shadowModelView * vec4(p, 1.0))).xyz * 0.5 + 0.5;
-    // The depth bias keeps a floor of 0.5 so zero softness doesn't bring acne back.
-    sc.z -= texel * (0.4 + 0.6 * slope * max(SHADOW_SOFTNESS, 0.5)) * 0.5 * abs(shadowProjection[2][2]);
+    vec3 sc = (shadowProjection * (shadowModelView * vec4(p, 1.0))).xyz;
+    sc.xy /= length(sc.xy) * SHADOW_WARP + (1.0 - SHADOW_WARP);
+    sc = sc * 0.5 + 0.5;
+    // The bias is kept small: at a wall base the occluder is barely nearer than the
+    // floor, and a bigger bias reads that floor as lit (a one-texel bright line along
+    // every concave corner at low sun). It still grows with slope and blur radius, and
+    // the radius floor of 0.5 keeps zero softness from bringing acne back.
+    sc.z -= texel * (0.1 + 0.25 * slope * max(SHADOW_SOFTNESS, 0.5)) * 0.5 * abs(shadowProjection[2][2]);
 
 #if SHADOW_SAMPLES == 0
     // Antialiasing off: sampling at a texel centre gives the 2x2 hardware filter
@@ -86,6 +98,9 @@ vec2 shadowTerm(vec3 feet, vec3 nWS) {
         }
     }
 #endif
+    // A face turned away from the light is never sunlit; without this the map
+    // lights grazing walls whose own back is the nearest caster.
+    vis *= smoothstep(0.0, 0.12, ndl);
     return vec2(vis, w);
 }
 #endif
@@ -148,19 +163,24 @@ vec3 shadeSurface(vec3 albedoGamma, vec2 lm, vec3 nWS, float ao, float foliage, 
     // ---- Direct light (sun by day, moon by night) --------------------------
     vec3 direct = vec3(0.0);
     if (hasSkylight) {
-        vec3 L = normalize(mat3(gbufferModelViewInverse) * shadowLightPosition);
-        float diff = clamp((dot(nWS, L) + 0.2) / 1.2, 0.0, 1.0);    // soft wrap
+        // Sun and moon directions come from sunPosition (the moon is opposite),
+        // not shadowLightPosition: Iris swaps that to the moon at tick ~23215,
+        // so around dawn the sun's colour was arriving from the moon's side.
+        vec3 Ls = normalize(mat3(gbufferModelViewInverse) * sunPosition);
+        float diffS = clamp((dot(nWS, Ls) + 0.2) / 1.2, 0.0, 1.0);    // soft wrap
+        float diffM = clamp((dot(nWS, -Ls) + 0.2) / 1.2, 0.0, 1.0);
         // Foliage: a leaf block is a cloud of small cards, not a solid face.
         // Light it almost evenly from every side, at less than full sun, so
         // sunlit canopy stops clipping and the shaded side still glows.
-        diff = mix(diff, 0.35 + 0.30 * diff, foliage);
+        diffS = mix(diffS, 0.35 + 0.30 * diffS, foliage);
+        diffM = mix(diffM, 0.35 + 0.30 * diffM, foliage);
         // Fake shadow from the sky-light level: open sky is 15, one leaf
         // layer or an overhang above drops it to 14 (0.935), which is shade.
         float open = sunOpen(sky, sh);
         vec3 sunCol = mix(vec3(1.00, 0.93, 0.80), vec3(1.00, 0.58, 0.22), warm) * SUN_INTENSITY;
         vec3 moonCol = vec3(0.42, 0.55, 1.00) * 0.10 * MOON_BRIGHTNESS;
-        vec3 directCol = mix(moonCol, sunCol, dayAmt) * (1.0 - 0.9 * rain);
-        direct = directCol * diff * open * mix(1.0, aoT, 0.5) * dayScale;
+        vec3 directCol = (moonCol * diffM * (1.0 - dayAmt) + sunCol * diffS * dayAmt) * (1.0 - 0.9 * rain);
+        direct = directCol * open * mix(1.0, aoT, 0.5) * dayScale;
     }
 
     // ---- Ambient: cool sky above, warm bounce below -----------------------
@@ -220,7 +240,7 @@ vec3 sunSheen(vec3 nWS, vec3 feet, float sky, vec2 sh) {
     float vis = sunOpen(sky, sh) * dayAmt * (1.0 - 0.9 * rainStrength);
     if (vis <= 0.001) return vec3(0.0);
 
-    vec3 L = normalize(mat3(gbufferModelViewInverse) * shadowLightPosition);
+    vec3 L = normalize(mat3(gbufferModelViewInverse) * sunPosition);
     vec3 V = -normalize(feet);
     float ndh = max(dot(nWS, normalize(L + V)), 0.0);
     float grazing = pow(1.0 - clamp(dot(nWS, V), 0.0, 1.0), 2.0);

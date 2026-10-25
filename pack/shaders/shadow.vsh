@@ -32,6 +32,20 @@ void main() {
 #else
     gl_Position = ftransform();
 #endif
+    // Warp the map toward the player: xy is divided by f, so texels near the
+    // camera are 1/(1-SHADOW_WARP) times denser. shadowTerm applies the same warp.
+    float warpF = length(gl_Position.xy) * SHADOW_WARP + (1.0 - SHADOW_WARP);
+    // Thicken back faces. A wall that faces away from the light is often the only
+    // caster over the floor at its base, a hair in front of that floor, so any
+    // lookup bias bigger than the gap reads the floor as lit (a bright line along
+    // the wall base at low sun). Pushing back faces a little toward the light puts
+    // them clearly in front; sun-facing faces are untouched.
+    if ((gl_NormalMatrix * gl_Normal).z < 0.0) {
+        // blocks per shadow texel at this vertex
+        float texel = 2.0 * SHADOW_DISTANCE / float(SHADOW_RESOLUTION) * warpF * warpF / (1.0 - SHADOW_WARP);
+        gl_Position.z += 2.0 * texel * gl_ProjectionMatrix[2][2];
+    }
+    gl_Position.xy /= warpF;
 #ifndef SHADOW_GRASS
     // Grass plants (10003): every vertex of the quad lands outside the clip
     // volume, so the quad is dropped before rasterizing and the alpha-test

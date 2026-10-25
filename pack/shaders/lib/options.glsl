@@ -97,6 +97,7 @@
 #define EMISSIVE_GLOW 1.50  // lava, glowstone, lanterns, torches
 #define SURFACE_SHEEN 25  // percent. View-dependent sun sheen on all surfaces (0 = off, flat Lambert look); strongest at grazing angles
 #define AO_STRENGTH 3.00
+#define SHADOW_WARP 0.75  // shadow map warp: texels near the player are 1/(1-this) times denser (4x), far ones coarser; same cost
 #define SHADOW_SOFTNESS 0.5  // blur radius of the shadow edge, in shadow-map texels (0 = no blur)
 #define CLOUD_DISTANCE 5.0  // cloud fade length, in render distances (higher = clouds reach the horizon)
 #define HAZE_SUN_GLOW 0.50
