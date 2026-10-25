@@ -14,24 +14,26 @@ in vec4 mc_Entity;   // block id from block.properties, -1 if unlisted
 
 out vec2 texcoord;
 
-#if defined ENABLE_SHADOWS && defined ENABLE_WAVING
+#ifdef ENABLE_SHADOWS
 uniform mat4 shadowModelView;
 uniform mat4 shadowModelViewInverse;
+#include "/lib/shadowyaw.glsl"
+#ifdef ENABLE_WAVING
 #include "/lib/wave.glsl"
+#endif
 #endif
 
 void main() {
     texcoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;
 #ifdef ENABLE_SHADOWS
-#ifdef ENABLE_WAVING
-    // Same sway as the terrain pass, so shadows stay attached to the plants.
     vec3 sv = (gl_ModelViewMatrix * gl_Vertex).xyz;
     vec3 playerPos = mat3(shadowModelViewInverse) * sv + shadowModelViewInverse[3].xyz;
+#ifdef ENABLE_WAVING
+    // Same sway as the terrain pass, so shadows stay attached to the plants.
     playerPos += waveOffset(playerPos + cameraPosition, int(mc_Entity.x), texcoord);
-    gl_Position = gl_ProjectionMatrix * (shadowModelView * vec4(playerPos, 1.0));
-#else
-    gl_Position = ftransform();
 #endif
+    mat3 yaw = shadowYaw();
+    gl_Position = gl_ProjectionMatrix * (shadowModelView * vec4(yaw * playerPos, 1.0));
     // Warp the map toward the player: xy is divided by f, so texels near the
     // camera are 1/(1-SHADOW_WARP) times denser. shadowTerm applies the same warp.
     float warpF = length(gl_Position.xy) * SHADOW_WARP + (1.0 - SHADOW_WARP);
@@ -40,7 +42,8 @@ void main() {
     // lookup bias bigger than the gap reads the floor as lit (a bright line along
     // the wall base at low sun). Pushing back faces a little toward the light puts
     // them clearly in front; sun-facing faces are untouched.
-    if ((gl_NormalMatrix * gl_Normal).z < 0.0) {
+    vec3 nView = mat3(shadowModelView) * (yaw * (mat3(shadowModelViewInverse) * (gl_NormalMatrix * gl_Normal)));
+    if (nView.z < 0.0) {
         // blocks per shadow texel at this vertex
         float texel = 2.0 * SHADOW_DISTANCE / float(SHADOW_RESOLUTION) * warpF * warpF / (1.0 - SHADOW_WARP);
         gl_Position.z += 2.0 * texel * gl_ProjectionMatrix[2][2];

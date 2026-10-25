@@ -21,11 +21,11 @@ const int shadowMapResolution = SHADOW_RESOLUTION;
 const float shadowDistance = SHADOW_DISTANCE;
 const float shadowDistanceRenderMul = 1.0;   // don't draw terrain beyond shadowDistance into the map
 const bool shadowHardwareFiltering = true;   // shadowtex1 becomes a sampler2DShadow (free 2x2 PCF)
-const float sunPathRotation = -25.0;          // tilt the sun path off the world axes (avoids sun running along walls)
 
 uniform sampler2DShadow shadowtex1;          // opaque casters only: glass and water don't shadow
 uniform mat4 shadowModelView;
 uniform mat4 shadowProjection;
+#include "/lib/shadowyaw.glsl"
 
 // Shadow lookup for a surface at 'feet' (player space, i.e. relative to the camera).
 // Returns x = sunlight visibility (1 = lit), y = how much to trust it (0 = use the
@@ -38,6 +38,10 @@ vec2 shadowTerm(vec3 feet, vec3 nWS) {
             * smoothstep(0.05, 0.25, h);
     if (w <= 0.0) return vec2(1.0, 0.0);
 
+    // Work in the frame the map was rendered in (see shadowyaw.glsl).
+    mat3 yaw = shadowYaw();
+    feet = yaw * feet;
+    nWS = yaw * nWS;
     vec3 L = normalize(mat3(gbufferModelViewInverse) * shadowLightPosition);
     float ndl = dot(nWS, L);
     // The map is warped toward the player (shadow.vsh does the same): xy is divided
