@@ -25,6 +25,8 @@ const bool colortex11Clear = false;
 
 uniform sampler2D noisetex;      // Iris built-in 256x256 white noise
 uniform sampler2D colortex0;
+uniform sampler2D depthtex0;
+uniform mat4 gbufferProjectionInverse;
 uniform sampler2D colortex4;
 uniform sampler2D colortex5;
 uniform sampler2D colortex9;
@@ -157,7 +159,30 @@ void main() {
 #ifdef ENABLE_BLOOM
     vec3 bloom = tap4(colortex4, uv, px * 2.0) * 0.30;
     bloom     += tap4(colortex5, uv, px * 24.0) * 0.70;
-    col += bloom * BLOOM_STRENGTH;
+    bloom *= BLOOM_STRENGTH;
+    // Nearby terrain gets less bloom the closer it already is to white, so
+    // sunlit sand and stone at your feet are not pushed into the clamp. Three
+    // zones by distance: close (under 1 chunk) is capped hardest, near (to 2
+    // chunks) holds a lighter cap, and past 3 the cap settles at a light trim
+    // because far away the haze reads right. Close to near is a short blend
+    // (12-20 blocks) so near keeps its own plateau; near to far fades over 32-48.
+    // Sky (depth 1) keeps the plain glow.
+    float depth = texture(depthtex0, uv).r;
+    float headroom = 1.0;
+    if (depth < 1.0) {
+        // Only bright surfaces are capped; grass, dirt and shade keep full bloom
+        // (capping them too made the ground read dark and muted).
+        float luma = dot(col * EXPOSURE, LUMA);
+        float bright = smoothstep(0.30, 0.80, luma);
+        headroom = mix(1.0, 0.90, bright);   // far terrain: a light trim so distant dunes are not near-white
+        vec4 vp = gbufferProjectionInverse * vec4(vec3(uv, depth) * 2.0 - 1.0, 1.0);
+        float dist = length(vp.xyz / vp.w);
+        float near = 1.0 - smoothstep(32.0, 48.0, dist);
+        float closeW = 1.0 - smoothstep(12.0, 20.0, dist);
+        float cap = mix(mix(0.60, 0.35, closeW), 1.0, clamp(1.0 - luma, 0.0, 1.0));
+        headroom = mix(headroom, mix(1.0, cap, bright), near);
+    }
+    col += bloom * headroom;
 #endif
 
     // God rays: already tinted and scaled, so a single bilinear upsample.
