@@ -38,7 +38,16 @@ filmic image as possible **without GI or ray tracing**, and stay fast.
   G-buffer, no deferred pass) and bloom runs at low resolution, keeping
   memory use and bandwidth low; that also matters on laptops and integrated GPUs.
 
-## What's new in 2.1.2
+## What's new in 2.1.3
+
+- **Sand and stone no longer blown out.** With the stronger bloom, bright ground
+  such as sand, cobblestone and snow washed out to near white. Bright terrain now
+  keeps only part of the bloom that lands on it, most strongly right around you
+  and easing off with distance, so nearby ground keeps its texture while distant
+  dunes stay hazy and bright. Grass, dirt, shade, the sky and the glow around
+  torches and lava are unchanged.
+
+### 2.1.2
 
 - **Shadow edge line fixed.** At low sun a thin bright line ran along the base
   of walls. Shadows now use a warped map that is denser near the player, a
