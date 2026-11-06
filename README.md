@@ -1,7 +1,8 @@
 # Filmicsoft
 
-A fast, semi-realistic shader pack for Minecraft: Java Edition (Iris + Sodium).
-It adds light and atmosphere without repainting the game.
+A high-performance, semi-realistic shader pack for Minecraft: Java Edition
+(Iris + Sodium). It adds light and atmosphere without repainting the game, and
+runs on macOS, Windows and Linux.
 
 | ![Meadow with oak trees and melons](docs/images/meadow.webp) | ![River between grassy hills](docs/images/river.webp) |
 |---|---|
@@ -13,7 +14,9 @@ It adds light and atmosphere without repainting the game.
 **Lighting and shadows**
 - Real sun and moon shadows from a filtered shadow map, reaching 64 blocks by
   default (up to 256), with a soft sky-light shadow beyond it
-- Soft shadow edges with adjustable smoothing: sharp up close, cheaper far away
+- Soft shadows that behave like real ones: crisp where an object meets the
+  ground, widening and fading with distance, so long sunset shadows melt away
+- Shadows stay fixed to the world while you walk and look around
 - Optional shadows from mobs and grass
 - Thin blocks (leaves, plants, panes, fences) cast clean shadows without
   shading themselves
@@ -43,6 +46,7 @@ It adds light and atmosphere without repainting the game.
 - Colour grading: exposure, contrast, black lift, saturation, vibrance, a
   colour intensity limit and tone colour presets
 - Highlight roll-off, so sand and snow don't clip to flat white
+- Chromatic aberration: a subtle lens fringe toward the screen edges
 - Film grain, vignette and FXAA anti-aliasing
 
 ## Why Filmicsoft
@@ -54,25 +58,37 @@ that it stops feeling like Minecraft. Filmicsoft goes the other way: a
 realistic-leaning image **without GI or ray tracing**, fast enough for everyday
 play.
 
-- **The Minecraft feel comes first.** Vanilla textures, block shapes, sky,
+- **Maintains Minecraft's original feel.** Vanilla textures, block shapes, sky,
   clouds, sun and moon are kept. Light, shadow, haze and colour are improved
   around them, never replaced, so the world still reads as Minecraft.
-- **Performance first.** Every pass is measured on the GPU (`tools/bench`, see
-  `BENCHMARK.md`) and kept only if it earns its cost. The post-processing chain
-  adds about 1.2 ms per frame at 1080p on an Apple M4, and in side-by-side play
-  it holds noticeably higher frame rates than packs marketed as ultra-light.
+- **High performance.** Every pass is measured on the GPU (`tools/bench`,
+  see `BENCHMARK.md`) and kept only if it earns its cost. The post-processing
+  chain adds about 1.2 ms per frame at 1080p on an Apple M4.
   Every effect can be switched off on its own, and the shadow map can be turned
   off or made cheaper on the Shadows page.
-- **Runs on macOS.** Most shader packs need OpenGL features that macOS doesn't
-  have (it stops at OpenGL 4.1), so they fail to load or render wrong on Macs.
-  Filmicsoft is written for GLSL 330: no compute shaders, no SSBOs. It is
-  built on Apple Silicon and tested on macOS and Windows, and should work the
-  same on Linux.
+- **Runs everywhere, macOS included.** Filmicsoft is written for GLSL 330 (no
+  compute shaders, no SSBOs), so it runs the same on Windows, Linux and macOS.
+  That makes it fully supported on Macs, where OpenGL stops at 4.1 and most
+  shader packs fail to load or render wrong. It is built on Apple Silicon.
 - **Light on your system.** Surfaces are lit where they are drawn (no
   G-buffer, no deferred pass) and bloom runs at low resolution, keeping
   memory use and bandwidth low; that also matters on laptops and integrated GPUs.
 
-## What's new in 2.2.0
+## What's new in 2.3.0
+
+- **Shadows hold still.** Block and grass shadows no longer crawl or shimmer
+  while you walk, and no longer switch on and off as you turn the camera. Only
+  your own shadow moves with you.
+- **Shadows that fall off like real ones.** Edges are crisp where an object
+  meets the ground and widen and fade further out, so at sunset a sugar cane's
+  shadow melts away instead of running on for 30 blocks at full strength.
+- **No more shadow flashes at sunset.** Long shadows of grass, plants and thin
+  blocks no longer pop in and out as you walk.
+- **Shadow Antialiasing** is now a simple on/off switch (Shadows page); the
+  sample count follows the edge softness on its own. Shadow edges are a little
+  softer by default.
+
+### 2.2.0
 
 - **Shadows reach further.** Shadow Distance now defaults to 64 blocks (was 36)
   and the slider goes up to 256. Shadows no longer fade out halfway: the switch
