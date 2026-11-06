@@ -1,24 +1,31 @@
 # Filmicsoft
 
-An extremely high-performance cinematic shader pack for Minecraft: Java Edition
-(Iris + Sodium). Real sun and moon shadows, atmospheric haze, soft diffusion,
-bloom, Lightroom-style color grading and film grain, at frame rates well above
-what you would expect for this look. Written for GLSL 330 so it runs on macOS (OpenGL 4.1),
+A fast, semi-realistic shader pack for Minecraft: Java Edition (Iris + Sodium)
+that keeps the feel of Minecraft. Real sun and moon shadows, atmospheric haze,
+soft diffusion, bloom, gentle color grading and film grain, at frame rates well
+above what you would expect for this look. Blocks, textures and the vanilla sky
+stay recognisably Minecraft: the pack adds light and atmosphere, it doesn't
+repaint the game. Written for GLSL 330 so it runs on macOS (OpenGL 4.1),
 Windows and Linux: no compute shaders, no SSBOs.
 
-| | |
+| ![Meadow with oak trees and melons](docs/images/meadow.webp) | ![River between grassy hills](docs/images/river.webp) |
 |---|---|
-| ![Desert village by the river](docs/images/desert-river.webp) | ![Sunrise with light shafts](docs/images/sunrise.webp) |
-| ![Underwater](docs/images/underwater.webp) | ![Village in a valley](docs/images/valley.webp) |
+| ![Village in the hills](docs/images/village-hills.webp) | ![Moonrise over the ocean](docs/images/moonrise.webp) |
+| ![Underwater seagrass](docs/images/underwater.webp) | ![Desert village by the river](docs/images/desert-river.webp) |
 
 ## Why Filmicsoft
 
 Realistic Minecraft shaders usually get their look from global illumination,
 ray tracing or path tracing. Those look great but cost a lot of frame time and
-need a strong GPU. Filmicsoft goes the other way: get as close to a realistic,
-filmic image as possible **without GI or ray tracing**, and stay fast.
+need a strong GPU, and they often push the game so far toward photo-realism
+that it stops feeling like Minecraft. Filmicsoft goes the other way: a
+realistic-leaning image **without GI or ray tracing**, fast enough for everyday
+play, and true to the look and feel of vanilla Minecraft.
 
-- **Extreme performance.** Surfaces are lit in a single forward pass and every
+- **The Minecraft feel comes first.** Vanilla textures, block shapes, sky,
+  clouds, sun and moon are kept. Light, shadow, haze and colour are improved
+  around them, never replaced, so the world still reads as Minecraft.
+- **Performance first.** Surfaces are lit in a single forward pass and every
   pass is measured on the GPU (`tools/bench`, see `BENCHMARK.md`) and kept only
   if it earns its cost. The post-processing chain adds about 1.2 ms per frame at
   1080p on an Apple M4, and in side-by-side play it holds noticeably higher
@@ -38,7 +45,22 @@ filmic image as possible **without GI or ray tracing**, and stay fast.
   G-buffer, no deferred pass) and bloom runs at low resolution, keeping
   memory use and bandwidth low; that also matters on laptops and integrated GPUs.
 
-## What's new in 2.1.3
+## What's new in 2.2.0
+
+- **Shadows reach further.** Shadow Distance now defaults to 64 blocks (was 36)
+  and the slider goes up to 256. Shadows no longer fade out halfway: the switch
+  to the soft sky-light shadow starts at 85% of the distance, where haze hides it.
+- **Cheap at range.** Close shadows look the same as before; past 16 blocks edge
+  smoothing tapers off, and past 32 blocks grass and small plants stop casting
+  and leaves cast as solid blocks, where those details are smaller than a
+  shadow pixel anyway.
+- **Thin blocks no longer shade themselves.** Leaf litter, mangrove roots,
+  bamboo, flowers, glass panes, bars, chains, fences, doors, rails and similar
+  blocks could throw a shadow across their own sunlit side, worst at noon.
+- **New screenshots and wording.** The README now says what the pack is for:
+  semi-realistic, fast, and true to the feel of Minecraft.
+
+### 2.1.3
 
 - **Sand and stone no longer blown out.** With the stronger bloom, bright ground
   such as sand, cobblestone and snow washed out to near white. Bright terrain now
