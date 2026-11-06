@@ -43,7 +43,11 @@ void main() {
     // the wall base at low sun). Pushing back faces a little toward the light puts
     // them clearly in front; sun-facing faces are untouched.
     vec3 nView = mat3(shadowModelView) * (yaw * (mat3(shadowModelViewInverse) * (gl_NormalMatrix * gl_Normal)));
-    if (nView.z < 0.0) {
+    // Not for thin cutouts (leaves, grass, litter, roots, flowers): their back face
+    // sits on top of the sunlit front face, so pushing it would shade the plant itself.
+    int id = int(mc_Entity.x);
+    bool thin = id == 10001 || id == 10003 || id == 10005;
+    if (nView.z < 0.0 && !thin) {
         // blocks per shadow texel at this vertex
         float texel = 2.0 * SHADOW_DISTANCE / float(SHADOW_RESOLUTION) * warpF * warpF / (1.0 - SHADOW_WARP);
         gl_Position.z += 2.0 * texel * gl_ProjectionMatrix[2][2];
