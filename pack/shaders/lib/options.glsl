@@ -43,7 +43,11 @@
 // ---- Shadows (only used when ENABLE_SHADOWS is on) -------------------------
 // Map covers SHADOW_DISTANCE blocks around the player; beyond it the sky-light
 // fake shadow takes over (cross-faded). Texel size = 2 * distance / resolution.
-#define SHADOW_DISTANCE 36       // [16 24 36 48 64 128]  blocks
+// Detail is kept near the player, whatever the distance: the map is warped
+// (SHADOW_WARP), edge antialiasing tapers out past SHADOW_NEAR..2x, and small
+// casters (grass, plants, thin blocks) stop casting past SHADOW_NEAR * 2.
+#define SHADOW_NEAR 16.0
+#define SHADOW_DISTANCE 64       // [16 24 36 48 64 96 128 192 256]  blocks
 #define SHADOW_RESOLUTION 1024   // [256 512 1024 2048 4096]
 #define SHADOW_SAMPLES 4        // [0 1 2 4 8 16 32 64]  edge antialiasing taps: 0 = off (hard, stair-stepped); more = smoother, costs GPU
 #define SHADOW_ENTITIES          // Mobs and items cast shadows too (every entity is drawn a second time: costs CPU)

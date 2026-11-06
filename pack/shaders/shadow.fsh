@@ -6,7 +6,8 @@
 uniform sampler2D gtexture;
 
 in vec2 texcoord;
+flat in int solidCutout;
 
 void main() {
-    if (texture(gtexture, texcoord).a < 0.5) discard;
+    if (solidCutout == 0 && texture(gtexture, texcoord).a < 0.5) discard;
 }

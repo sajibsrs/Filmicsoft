@@ -11,6 +11,9 @@
 #endif
 
 in vec4 mc_Entity;   // block id from block.properties, -1 if unlisted
+in vec3 at_midBlock; // offset to the block centre, in 1/64 block
+
+flat out int solidCutout;   // far leaves: skip the alpha test (holes are sub-texel there)
 
 out vec2 texcoord;
 
@@ -25,9 +28,11 @@ uniform mat4 shadowModelViewInverse;
 
 void main() {
     texcoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;
+    solidCutout = 0;
 #ifdef ENABLE_SHADOWS
     vec3 sv = (gl_ModelViewMatrix * gl_Vertex).xyz;
     vec3 playerPos = mat3(shadowModelViewInverse) * sv + shadowModelViewInverse[3].xyz;
+    float blockDist = length(playerPos + at_midBlock / 64.0);   // before waving, so a quad's vertices agree
 #ifdef ENABLE_WAVING
     // Same sway as the terrain pass, so shadows stay attached to the plants.
     playerPos += waveOffset(playerPos + cameraPosition, int(mc_Entity.x), texcoord);
@@ -50,7 +55,9 @@ void main() {
     if (nView.z < 0.0 && !thin) {
         // blocks per shadow texel at this vertex
         float texel = 2.0 * SHADOW_DISTANCE / float(SHADOW_RESOLUTION) * warpF * warpF / (1.0 - SHADOW_WARP);
-        gl_Position.z += 2.0 * texel * gl_ProjectionMatrix[2][2];
+        // Capped in blocks: at long range a texel is up to half a block, and a full
+        // block of push makes ledges throw a dark line onto the step below.
+        gl_Position.z += min(2.0 * texel, 0.25) * gl_ProjectionMatrix[2][2];
     }
     gl_Position.xy /= warpF;
 #ifndef SHADOW_GRASS
@@ -59,6 +66,13 @@ void main() {
     // fragments of dense grass fields are never run.
     if (int(mc_Entity.x) == 10003) gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
 #endif
+    // Far away, small casters (grass, plants, thin blocks) are smaller than a
+    // shadow texel: drop them. Decided per block (centre distance) so all
+    // vertices of a quad agree and no triangle is half-clipped.
+    if (blockDist > 2.0 * SHADOW_NEAR) {
+        if (id == 10003 || id == 10005) gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
+        if (id == 10001) solidCutout = 1;
+    }
 #else
     gl_Position = vec4(2.0, 2.0, 2.0, 1.0);   // clipped: nothing is drawn if the pass runs anyway
 #endif

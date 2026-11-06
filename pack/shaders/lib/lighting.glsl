@@ -34,7 +34,7 @@ vec2 shadowTerm(vec3 feet, vec3 nWS) {
     if (!hasSkylight) return vec2(1.0, 0.0);
     float h = sin(sunAngle * 6.28318530718);
     float dist = length(feet);
-    float w = (1.0 - smoothstep(0.45 * SHADOW_DISTANCE, 0.95 * SHADOW_DISTANCE, dist))
+    float w = (1.0 - smoothstep(0.85 * SHADOW_DISTANCE, 0.98 * SHADOW_DISTANCE, dist))
             * smoothstep(0.05, 0.25, h);
     if (w <= 0.0) return vec2(1.0, 0.0);
 
@@ -54,7 +54,8 @@ vec2 shadowTerm(vec3 feet, vec3 nWS) {
 
     // Normal offset (kills acne on faces that graze the light) + slope-scaled depth bias.
     // One block of depth = 0.5 * |shadowProjection[2][2]| in map depth units.
-    vec3 p = feet + nWS * texel * (0.8 + 1.6 * (1.0 - clamp(ndl, 0.0, 1.0)));
+    // Capped in blocks so the far lookup does not step past a block edge.
+    vec3 p = feet + nWS * min(texel * (0.8 + 1.6 * (1.0 - clamp(ndl, 0.0, 1.0))), 0.3);
     vec3 sc = (shadowProjection * (shadowModelView * vec4(p, 1.0))).xyz;
     sc.xy /= length(sc.xy) * SHADOW_WARP + (1.0 - SHADOW_WARP);
     sc = sc * 0.5 + 0.5;
@@ -71,7 +72,9 @@ vec2 shadowTerm(vec3 feet, vec3 nWS) {
     float vis = texture(shadowtex1, sc);
 #else
     float vis;
-    if (SHADOW_SOFTNESS <= 0.0) {
+    // Past 2x SHADOW_NEAR an edge covers a few screen pixels at most: the
+    // hardware 2x2 filter alone is enough there.
+    if (SHADOW_SOFTNESS <= 0.0 || dist > 2.0 * SHADOW_NEAR) {
         vis = texture(shadowtex1, sc);   // no blur radius: just the hardware 2x2 filter
     } else {
         // Rotated Vogel disk; per-pixel rotation trades banding for noise that
@@ -91,7 +94,8 @@ vec2 shadowTerm(vec3 feet, vec3 nWS) {
             vis += texture(shadowtex1, vec3(sc.xy + r * vec2(cos(a), sin(a)), sc.z));
         }
         vis /= float(FIRST);
-        if (SHADOW_SAMPLES > FIRST && vis > 0.001 && vis < 0.999) {
+        // Full count only near the player; mid range keeps the first few taps.
+        if (SHADOW_SAMPLES > FIRST && dist < SHADOW_NEAR && vis > 0.001 && vis < 0.999) {
             vis = 0.0;
             for (int i = 0; i < SHADOW_SAMPLES; i++) {
                 float a = float(i) * 2.39996323 + rot;
