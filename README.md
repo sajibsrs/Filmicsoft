@@ -1,17 +1,49 @@
 # Filmicsoft
 
-A fast, semi-realistic shader pack for Minecraft: Java Edition (Iris + Sodium)
-that keeps the feel of Minecraft. Real sun and moon shadows, atmospheric haze,
-soft diffusion, bloom, gentle color grading and film grain, at frame rates well
-above what you would expect for this look. Blocks, textures and the vanilla sky
-stay recognisably Minecraft: the pack adds light and atmosphere, it doesn't
-repaint the game. Written for GLSL 330 so it runs on macOS (OpenGL 4.1),
-Windows and Linux: no compute shaders, no SSBOs.
+A fast, semi-realistic shader pack for Minecraft: Java Edition (Iris + Sodium).
+It adds light and atmosphere without repainting the game.
 
 | ![Meadow with oak trees and melons](docs/images/meadow.webp) | ![River between grassy hills](docs/images/river.webp) |
 |---|---|
 | ![Village in the hills](docs/images/village-hills.webp) | ![Moonrise over the ocean](docs/images/moonrise.webp) |
 | ![Underwater seagrass](docs/images/underwater.webp) | ![Desert village by the river](docs/images/desert-river.webp) |
+
+## Features
+
+**Lighting and shadows**
+- Real sun and moon shadows from a filtered shadow map, reaching 64 blocks by
+  default (up to 256), with a soft sky-light shadow beyond it
+- Soft shadow edges with adjustable smoothing: sharp up close, cheaper far away
+- Optional shadows from mobs and grass
+- Thin blocks (leaves, plants, panes, fences) cast clean shadows without
+  shading themselves
+- Light filters softly through leaves, grass and vines
+- Warm torch and block light; lava, glowstone, lanterns and other light
+  sources glow
+- Golden mornings and evenings: the sun warms and dims toward the horizon
+- Adjustable sun strength, sky ambient and moon / night brightness
+
+**Sky and atmosphere**
+- Sky scattering: deeper blue overhead, a warm glow around the sun
+- Sun-lit clouds
+- Distance haze that matches the sky, plus a horizon mist
+- God rays
+- Rain atmosphere with wet-looking ground
+
+**Water**
+- Water that reflects the sky, with blocky ripples in keeping with the game
+- Underwater look: light absorption, teal fog and caustics on the sea floor
+
+**Movement**
+- Waving leaves, grass and plants with adjustable wind; shadows sway with them
+
+**Film look**
+- Bloom, held back on bright sand and stone so they don't wash out
+- Soft diffusion
+- Colour grading: exposure, contrast, black lift, saturation, vibrance, a
+  colour intensity limit and tone colour presets
+- Highlight roll-off, so sand and snow don't clip to flat white
+- Film grain, vignette and FXAA anti-aliasing
 
 ## Why Filmicsoft
 
@@ -20,22 +52,17 @@ ray tracing or path tracing. Those look great but cost a lot of frame time and
 need a strong GPU, and they often push the game so far toward photo-realism
 that it stops feeling like Minecraft. Filmicsoft goes the other way: a
 realistic-leaning image **without GI or ray tracing**, fast enough for everyday
-play, and true to the look and feel of vanilla Minecraft.
+play.
 
 - **The Minecraft feel comes first.** Vanilla textures, block shapes, sky,
   clouds, sun and moon are kept. Light, shadow, haze and colour are improved
   around them, never replaced, so the world still reads as Minecraft.
-- **Performance first.** Surfaces are lit in a single forward pass and every
-  pass is measured on the GPU (`tools/bench`, see `BENCHMARK.md`) and kept only
-  if it earns its cost. The post-processing chain adds about 1.2 ms per frame at
-  1080p on an Apple M4, and in side-by-side play it holds noticeably higher
-  frame rates than packs marketed as ultra-light. The shadow map is extra and
-  can be turned off or made cheaper (see Options).
-- **Realism from cheap tricks.** Forward lighting with a soft sun/moon, sky
-  ambient and warm torch light, and a real filtered shadow map for the sun and
-  moon (with a sky-light fake as the fallback when it is off or out of range).
-  Distance haze matches the sky. Then a film look on top: bloom, diffusion,
-  colour grading and grain.
+- **Performance first.** Every pass is measured on the GPU (`tools/bench`, see
+  `BENCHMARK.md`) and kept only if it earns its cost. The post-processing chain
+  adds about 1.2 ms per frame at 1080p on an Apple M4, and in side-by-side play
+  it holds noticeably higher frame rates than packs marketed as ultra-light.
+  Every effect can be switched off on its own, and the shadow map can be turned
+  off or made cheaper on the Shadows page.
 - **Runs on macOS.** Most shader packs need OpenGL features that macOS doesn't
   have (it stops at OpenGL 4.1), so they fail to load or render wrong on Macs.
   Filmicsoft is written for GLSL 330: no compute shaders, no SSBOs. It is
