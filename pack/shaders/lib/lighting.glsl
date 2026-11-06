@@ -20,10 +20,18 @@ uniform vec3 fogColor;
 const int shadowMapResolution = SHADOW_RESOLUTION;
 const float shadowDistance = SHADOW_DISTANCE;
 const float shadowDistanceRenderMul = 1.0;   // don't draw terrain beyond shadowDistance into the map
-const bool shadowHardwareFiltering = true;   // shadowtex1 becomes a sampler2DShadow (free 2x2 PCF)
+// The map re-centres on the player only every 4 blocks (Iris default 2). The warp
+// is centred on the map, so each re-centre shifts every edge's texels; fewer
+// re-centres means shadows hold still while walking.
+const float shadowIntervalSize = 4.0;
+const bool shadowHardwareFiltering1 = true;  // shadowtex1 becomes a sampler2DShadow (free 2x2 PCF)
 
 uniform sampler2DShadow shadowtex1;          // opaque casters only: glass and water don't shadow
+// Raw depth of the same casters (no translucents are drawn into the map, so
+// shadowtex0 holds what shadowtex1 holds). Read to find how far the caster is.
+uniform sampler2D shadowtex0;
 uniform mat4 shadowModelView;
+uniform mat4 shadowModelViewInverse;
 uniform mat4 shadowProjection;
 #include "/lib/shadowyaw.glsl"
 
@@ -40,7 +48,7 @@ vec2 shadowTerm(vec3 feet, vec3 nWS) {
 
     // Work in the frame the map was rendered in (see shadowyaw.glsl).
     mat3 yaw = shadowYaw();
-    feet = yaw * feet;
+    feet = shadowYawPos(feet);
     nWS = yaw * nWS;
     vec3 L = normalize(mat3(gbufferModelViewInverse) * shadowLightPosition);
     float ndl = dot(nWS, L);
@@ -55,7 +63,9 @@ vec2 shadowTerm(vec3 feet, vec3 nWS) {
     // Normal offset (kills acne on faces that graze the light) + slope-scaled depth bias.
     // One block of depth = 0.5 * |shadowProjection[2][2]| in map depth units.
     // Capped in blocks so the far lookup does not step past a block edge.
-    vec3 p = feet + nWS * min(texel * (0.8 + 1.6 * (1.0 - clamp(ndl, 0.0, 1.0))), 0.3);
+    // The offset grows with the blur radius: a wide disk otherwise reaches past
+    // the block edge onto the face's own block and darkens the edge (self-shadow).
+    vec3 p = feet + nWS * min(texel * (0.8 + SHADOW_SOFTNESS + 1.6 * (1.0 - clamp(ndl, 0.0, 1.0))), 0.3);
     vec3 sc = (shadowProjection * (shadowModelView * vec4(p, 1.0))).xyz;
     sc.xy /= length(sc.xy) * SHADOW_WARP + (1.0 - SHADOW_WARP);
     sc = sc * 0.5 + 0.5;
@@ -65,40 +75,57 @@ vec2 shadowTerm(vec3 feet, vec3 nWS) {
     // the radius floor of 0.5 keeps zero softness from bringing acne back.
     sc.z -= texel * (0.1 + 0.25 * slope * max(SHADOW_SOFTNESS, 0.5)) * 0.5 * abs(shadowProjection[2][2]);
 
-#if SHADOW_SAMPLES == 0
+#ifndef SHADOW_AA
     // Antialiasing off: sampling at a texel centre gives the 2x2 hardware filter
     // full weight on one texel, so the edge is the raw shadow-map staircase.
     sc.xy = (floor(sc.xy * float(SHADOW_RESOLUTION)) + 0.5) / float(SHADOW_RESOLUTION);
     float vis = texture(shadowtex1, sc);
 #else
+    // The sun is a disk, not a point, so a shadow's edge widens and fades with
+    // distance from its caster: a sugar cane's shadow melts away a few blocks
+    // out, a hill's keeps a dark core with a soft rim. Find the caster depth
+    // with a few raw taps, then grow the blur radius with the gap.
+    const float SEARCH = 8.0;            // blocker search and widest blur, in texels
+    const float PENUMBRA = 0.015;        // blur radius in blocks per block of gap (~3x the real sun, reads better at game scale)
+    float depthPerBlock = 0.5 * abs(shadowProjection[2][2]);
+    float uvTexel = 1.0 / float(SHADOW_RESOLUTION);
+    float zSum = 0.0, nBlock = 0.0;
+    for (int k = 0; k < 4; k++) {
+        float a = float(k) * 1.57079632679 + 0.785398163;
+        vec2 o = (k < 2 ? 0.4 : 1.0) * SEARCH * uvTexel * vec2(cos(a), sin(a));
+        float z = texture(shadowtex0, sc.xy + o).r;
+        if (z < sc.z) { zSum += z; nBlock += 1.0; }
+    }
+    float zc = texture(shadowtex0, sc.xy).r;
+    if (zc < sc.z) { zSum += zc; nBlock += 1.0; }
+
     float vis;
-    // Past 2x SHADOW_NEAR an edge covers a few screen pixels at most: the
-    // hardware 2x2 filter alone is enough there.
-    if (SHADOW_SOFTNESS <= 0.0 || dist > 2.0 * SHADOW_NEAR) {
-        vis = texture(shadowtex1, sc);   // no blur radius: just the hardware 2x2 filter
+    if (nBlock == 0.0) {
+        vis = texture(shadowtex1, sc);   // no caster near: lit, or a hairline edge the 2x2 filter covers
     } else {
-        // Rotated Vogel disk; per-pixel rotation trades banding for noise that
-        // film grain and FXAA hide.
-        float rot = 6.28318530718 * fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))));
-        float radius = SHADOW_SOFTNESS / float(SHADOW_RESOLUTION);
-        // Early out: a few spread-out taps first; if they all agree the pixel
-        // is fully lit or fully shadowed (most of the screen), skip the rest.
-        // Only penumbra pixels pay for the full sample count.
-        const int FIRST = SHADOW_SAMPLES < 4 ? SHADOW_SAMPLES : 4;
+        float gap = max(sc.z - zSum / nBlock, 0.0) / depthPerBlock;   // blocks from caster to this surface
+        float radiusTexels = clamp(gap * PENUMBRA / texel, SHADOW_SOFTNESS, SEARCH);
+        float radius = radiusTexels * uvTexel;
+        // Vogel disk with a fixed rotation. A per-pixel (screen-space) rotation hid
+        // banding behind noise, but that noise is pinned to the screen while the
+        // shadow is pinned to the world, so edges fizzed whenever the camera moved.
+        // Early out: a few spread-out taps first; if they all agree the pixel is
+        // fully lit or fully shadowed, skip the rest. Only penumbra pixels pay.
+        const int SHADOW_SAMPLES = 32;
+        const int FIRST = 4;
         const int STRIDE = SHADOW_SAMPLES / FIRST;
         vis = 0.0;
         for (int k = 0; k < FIRST; k++) {
             int i = k * STRIDE + STRIDE / 2;
-            float a = float(i) * 2.39996323 + rot;
+            float a = float(i) * 2.39996323;
             float r = sqrt((float(i) + 0.5) / float(SHADOW_SAMPLES)) * radius;
             vis += texture(shadowtex1, vec3(sc.xy + r * vec2(cos(a), sin(a)), sc.z));
         }
         vis /= float(FIRST);
-        // Full count only near the player; mid range keeps the first few taps.
-        if (SHADOW_SAMPLES > FIRST && dist < SHADOW_NEAR && vis > 0.001 && vis < 0.999) {
+        if (vis > 0.001 && vis < 0.999) {
             vis = 0.0;
             for (int i = 0; i < SHADOW_SAMPLES; i++) {
-                float a = float(i) * 2.39996323 + rot;
+                float a = float(i) * 2.39996323;
                 float r = sqrt((float(i) + 0.5) / float(SHADOW_SAMPLES)) * radius;
                 vis += texture(shadowtex1, vec3(sc.xy + r * vec2(cos(a), sin(a)), sc.z));
             }

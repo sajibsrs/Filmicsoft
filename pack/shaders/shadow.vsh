@@ -20,6 +20,7 @@ out vec2 texcoord;
 #ifdef ENABLE_SHADOWS
 uniform mat4 shadowModelView;
 uniform mat4 shadowModelViewInverse;
+uniform float sunAngle;
 #include "/lib/shadowyaw.glsl"
 #ifdef ENABLE_WAVING
 #include "/lib/wave.glsl"
@@ -38,7 +39,7 @@ void main() {
     playerPos += waveOffset(playerPos + cameraPosition, int(mc_Entity.x), texcoord);
 #endif
     mat3 yaw = shadowYaw();
-    gl_Position = gl_ProjectionMatrix * (shadowModelView * vec4(yaw * playerPos, 1.0));
+    gl_Position = gl_ProjectionMatrix * (shadowModelView * vec4(shadowYawPos(playerPos), 1.0));
     // Warp the map toward the player: xy is divided by f, so texels near the
     // camera are 1/(1-SHADOW_WARP) times denser. shadowTerm applies the same warp.
     float warpF = length(gl_Position.xy) * SHADOW_WARP + (1.0 - SHADOW_WARP);
@@ -69,8 +70,13 @@ void main() {
     // Far away, small casters (grass, plants, thin blocks) are smaller than a
     // shadow texel: drop them. Decided per block (centre distance) so all
     // vertices of a quad agree and no triangle is half-clipped.
+    // Only while the sun is above 30 degrees: then a shadow is at most ~1.7x its
+    // caster's height. At low sun a sugar cane or grass shadow runs 10-40 blocks
+    // toward the player, and dropping it at this distance made whole long shadows
+    // pop in and out while walking across the threshold.
+    float sunH = sin(sunAngle * 6.28318530718);
     if (blockDist > 2.0 * SHADOW_NEAR) {
-        if (id == 10003 || id == 10005) gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
+        if ((id == 10003 || id == 10005) && sunH > 0.5) gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
         if (id == 10001) solidCutout = 1;
     }
 #else

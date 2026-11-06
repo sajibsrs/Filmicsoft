@@ -44,12 +44,13 @@
 // Map covers SHADOW_DISTANCE blocks around the player; beyond it the sky-light
 // fake shadow takes over (cross-faded). Texel size = 2 * distance / resolution.
 // Detail is kept near the player, whatever the distance: the map is warped
-// (SHADOW_WARP), edge antialiasing tapers out past SHADOW_NEAR..2x, and small
-// casters (grass, plants, thin blocks) stop casting past SHADOW_NEAR * 2.
+// (SHADOW_WARP), and while the sun is high, small casters (grass, plants, thin
+// blocks) stop casting past SHADOW_NEAR * 2. At low sun their shadows are long
+// and they keep casting.
 #define SHADOW_NEAR 16.0
 #define SHADOW_DISTANCE 64       // [16 24 36 48 64 96 128 192 256]  blocks
 #define SHADOW_RESOLUTION 1024   // [256 512 1024 2048 4096]
-#define SHADOW_SAMPLES 4        // [0 1 2 4 8 16 32 64]  edge antialiasing taps: 0 = off (hard, stair-stepped); more = smoother, costs GPU
+#define SHADOW_AA                // shadow edge antialiasing: off = hard, stair-stepped edges. Tap count follows SHADOW_SOFTNESS
 #define SHADOW_ENTITIES          // Mobs and items cast shadows too (every entity is drawn a second time: costs CPU)
 #define SHADOW_GRASS             // Grass and ferns cast shadows (dense fields put many extra cutout quads in the shadow map: costs GPU)
 
@@ -103,7 +104,7 @@
 #define AO_STRENGTH 3.00
 #define SHADOW_WARP 0.75  // shadow map warp: texels near the player are 1/(1-this) times denser (4x), far ones coarser; same cost
 #define SHADOW_YAW 25.0  // degrees the shadow light is turned from the real sun around the vertical axis (0 = true direction)
-#define SHADOW_SOFTNESS 0.5  // blur radius of the shadow edge, in shadow-map texels (0 = no blur)
+#define SHADOW_SOFTNESS 1.0  // blur radius of the shadow edge, in shadow-map texels (0 = no blur)
 #define CLOUD_DISTANCE 5.0  // cloud fade length, in render distances (higher = clouds reach the horizon)
 #define HAZE_SUN_GLOW 0.50
 #define SKY_SCATTER 1.00  // deeper blue overhead, warm glow around the sun (0 = plain vanilla gradient)
