@@ -32,9 +32,6 @@ const float shadowIntervalSize = 4.0;
 const bool shadowHardwareFiltering1 = true;  // shadowtex1 becomes a sampler2DShadow (free 2x2 PCF)
 
 uniform sampler2DShadow shadowtex1;          // opaque casters only: glass and water don't shadow
-// Raw depth of the same casters (no translucents are drawn into the map, so
-// shadowtex0 holds what shadowtex1 holds). Read to find how far the caster is.
-uniform sampler2D shadowtex0;
 uniform mat4 shadowModelView;
 uniform mat4 shadowModelViewInverse;
 uniform mat4 shadowProjection;
@@ -96,65 +93,32 @@ vec2 shadowTerm(vec3 feet, vec3 nWS) {
     sc.xy = (floor(sc.xy * float(SHADOW_MAP_RES)) + 0.5) / float(SHADOW_MAP_RES);
     float vis = texture(shadowtex1, sc);
 #else
-    // The sun is a disk, not a point, so a shadow's edge widens and fades with
-    // distance from its caster: a sugar cane's shadow melts away a few blocks
-    // out, a hill's keeps a dark core with a soft rim. Find the caster depth
-    // with a few raw taps, then grow the blur radius with the gap.
-    // Search and widest blur are capped in BLOCKS, not texels. At long shadow
-    // distances a far texel is up to 2 blocks, and an 8-texel disk (16 blocks)
-    // on a hillside counts the slope itself as a caster: blotchy self-shadow
-    // that shifted with every map re-centre (flicker, long smears on hills).
-    // Blur radius in blocks per block of gap, ~4x the real sun. A block's shadow
-    // stays sharp at its base and only softens toward the far end. 0.04 washed
-    // a thin caster (the player, a post) out to a faint smear at low sun; 0.015
-    // left a fence post's shadow a crisp line many blocks out.
-    const float PENUMBRA = 0.02;
-    float SEARCH = clamp(1.0 / texel, 1.0, 8.0);   // texels spanning ~1 block, 8 at most
-    float depthPerBlock = 0.5 * abs(shadowProjection[2][2]);
-    float uvTexel = 1.0 / float(SHADOW_MAP_RES);
-    float zSum = 0.0, nBlock = 0.0;
+    // Fixed-radius edge filter: a SHADOW_SOFTNESS-texel disk, the same width
+    // everywhere. Shadows that widened with distance from their caster (a
+    // blocker search over shadowtex0 picking the radius) were tried and dropped:
+    // a 9-tap search gave neighbouring pixels different radii, so the soft edge
+    // tore into hard patches and wide edges read as a pale second layer.
+    // Early out: 4 diagonal taps on the rim; if they agree the pixel is fully
+    // lit or shadowed (gaps of ~1.4 texels, covered by the 2x2 hardware
+    // filter). Only edge pixels pay for the 12 more taps.
+    float radius = SHADOW_SOFTNESS / float(SHADOW_MAP_RES);
+    float vis = 0.0;
     for (int k = 0; k < 4; k++) {
         float a = float(k) * 1.57079632679 + 0.785398163;
-        vec2 o = (k < 2 ? 0.4 : 1.0) * SEARCH * uvTexel * vec2(cos(a), sin(a));
-        float z = texture(shadowtex0, sc.xy + o).r;
-        if (z < sc.z) { zSum += z; nBlock += 1.0; }
+        vis += texture(shadowtex1, vec3(sc.xy + radius * vec2(cos(a), sin(a)), sc.z));
     }
-    float zc = texture(shadowtex0, sc.xy).r;
-    if (zc < sc.z) { zSum += zc; nBlock += 1.0; }
-
-    float vis;
-    if (nBlock == 0.0) {
-        vis = texture(shadowtex1, sc);   // no caster near: lit, or a hairline edge the 2x2 filter covers
-    } else {
-        float gap = max(sc.z - zSum / nBlock, 0.0) / depthPerBlock;   // blocks from caster to this surface
-        float radiusTexels = clamp(gap * PENUMBRA / texel, SHADOW_SOFTNESS, SEARCH);
-        float radius = radiusTexels * uvTexel;
-        // Vogel disk with a fixed rotation. A per-pixel (screen-space) rotation hid
-        // banding behind noise, but that noise is pinned to the screen while the
-        // shadow is pinned to the world, so edges fizzed whenever the camera moved.
-        // Early out: a few spread-out taps first; if they all agree the pixel is
-        // fully lit or fully shadowed, skip the rest. Only penumbra pixels pay.
-        const int SHADOW_SAMPLES = 32;
-        // The early taps are their own cross, 90 degrees apart at 0.75 radius.
-        // Every 8th Vogel tap is NOT spread out: 8 x 137.5 deg is only 20 deg
-        // after full turns, so those 4 sat in one 60-degree fan, missed edges on
-        // the other side and left crisp one-sided teeth along shadow edges.
-        const int FIRST = 4;
-        vis = 0.0;
-        for (int k = 0; k < FIRST; k++) {
-            float a = float(k) * 1.57079632679 + 0.785398163;
-            vis += texture(shadowtex1, vec3(sc.xy + 0.75 * radius * vec2(cos(a), sin(a)), sc.z));
+    vis *= 0.25;
+    if (vis > 0.001 && vis < 0.999) {
+        // Vogel disk with a fixed rotation (a screen-space rotation fizzed when
+        // the camera moved: that noise is pinned to the screen, the shadow to the world).
+        const int SHADOW_SAMPLES = 12;
+        float sum = vis * 4.0;
+        for (int i = 0; i < SHADOW_SAMPLES; i++) {
+            float a = float(i) * 2.39996323;
+            float r = sqrt((float(i) + 0.5) / float(SHADOW_SAMPLES)) * radius;
+            sum += texture(shadowtex1, vec3(sc.xy + r * vec2(cos(a), sin(a)), sc.z));
         }
-        vis /= float(FIRST);
-        if (vis > 0.001 && vis < 0.999) {
-            vis = 0.0;
-            for (int i = 0; i < SHADOW_SAMPLES; i++) {
-                float a = float(i) * 2.39996323;
-                float r = sqrt((float(i) + 0.5) / float(SHADOW_SAMPLES)) * radius;
-                vis += texture(shadowtex1, vec3(sc.xy + r * vec2(cos(a), sin(a)), sc.z));
-            }
-            vis /= float(SHADOW_SAMPLES);
-        }
+        vis = sum / float(SHADOW_SAMPLES + 4);
     }
 #endif
     // A face turned away from the light is never sunlit; without this the map
