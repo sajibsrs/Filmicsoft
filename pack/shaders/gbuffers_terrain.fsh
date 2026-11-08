@@ -22,7 +22,7 @@ in vec3 normal;
 in vec3 viewPos;
 flat in int foliage;
 flat in int emissive;
-flat in int grassCard;
+flat in int plantCard;
 
 layout(location = 0) out vec4 outColor;
 
@@ -31,7 +31,7 @@ void main() {
     if (tex.a < alphaTestRef) discard;
 
     vec3 n = normalize(normal);
-    grassBlade = grassCard == 1;   // thin-card lighting, see litSurface
+    isPlantCard = plantCard == 1;   // thin-card lighting, see litSurface
     vec2 lm = clamp(lmcoord, 0.0, 1.0);
     float ao = glcolor.a;
 

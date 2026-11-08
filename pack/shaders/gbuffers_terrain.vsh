@@ -9,7 +9,7 @@ out vec3 normal;
 out vec3 viewPos;
 flat out int foliage;
 flat out int emissive;
-flat out int grassCard;
+flat out int plantCard;
 
 in vec4 mc_Entity;   // block id from block.properties, -1 if unlisted
 
@@ -35,7 +35,7 @@ void main() {
     int id = int(mc_Entity.x);
     foliage = (id == 10001 || id == 10003) ? 1 : 0;
     emissive = id == 10002 ? 1 : 0;
-    grassCard = id == 10003 ? 1 : 0;
+    plantCard = (id == 10003 || id == 10006) ? 1 : 0;
     // View space -> player space, so lighting can use the world-oriented sun.
     normal = mat3(gbufferModelViewInverse) * (gl_NormalMatrix * gl_Normal);
 }

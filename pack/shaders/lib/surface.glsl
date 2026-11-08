@@ -8,8 +8,9 @@
 uniform vec3 cameraPosition;
 uniform float frameTimeCounter;
 
-// Set by the terrain program for grass plants (block id 10003) before litSurface.
-bool grassBlade = false;
+// Set by the terrain program for plant cards (grass 10003, other thin plants
+// 10006) before litSurface.
+bool isPlantCard = false;
 
 // viewPos      : view-space position of the surface
 // useShadowMap : false for the hand, whose view space is not the world's
@@ -28,7 +29,7 @@ vec3 litSurface(vec3 albedoGamma, vec2 lm, vec3 nWS, float ao, float foliage, fl
         albedoGamma *= 1.0 - 0.30 * wet;
     }
 
-    // Grass is a pair of crossed cards drawn as two faces back to back. From
+    // Grass, flowers and crops are crossed cards drawn as two faces back to back. From
     // the side away from the sun you see the face whose normal points away
     // from it, and the shadow lookup blacks out any face turned from the
     // light. A blade is thin, so that face is lit as if it faced the sun, at
@@ -39,7 +40,7 @@ vec3 litSurface(vec3 albedoGamma, vec2 lm, vec3 nWS, float ao, float foliage, fl
     // keeps the card's own normal, so edge-on blades stay darker than the
     // ground. No sheen: a view-dependent highlight on a card flashes.
     vec3 nShadow = nWS;
-    if (grassBlade) {
+    if (isPlantCard) {
         vec3 L = normalize(mat3(gbufferModelViewInverse) * shadowLightPosition);
         float facing = dot(nWS, L);
         sunTransmit = mix(0.45, 1.0, smoothstep(-0.30, 0.0, facing));
@@ -58,7 +59,7 @@ vec3 litSurface(vec3 albedoGamma, vec2 lm, vec3 nWS, float ao, float foliage, fl
 #endif
     vec3 rgb = shadeSurface(albedoGamma, lm, nWS, ao, foliage, emissive, sh);
 #if SURFACE_SHEEN > 0
-    if (!grassBlade) rgb += sunSheen(nWS, feet, lm.y, sh) * (1.0 - emissive);
+    if (!isPlantCard) rgb += sunSheen(nWS, feet, lm.y, sh) * (1.0 - emissive);
 #endif
     if (wet > 0.0) {
         // View rotation is orthonormal, so its inverse is the transpose: this

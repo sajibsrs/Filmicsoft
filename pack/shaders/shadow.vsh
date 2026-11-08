@@ -49,10 +49,10 @@ void main() {
     // the wall base at low sun). Pushing back faces a little toward the light puts
     // them clearly in front; sun-facing faces are untouched.
     vec3 nView = mat3(shadowModelView) * (yaw * (mat3(shadowModelViewInverse) * (gl_NormalMatrix * gl_Normal)));
-    // Not for thin cutouts (leaves, grass, litter, roots, flowers): their back face
+    // Not for thin cutouts (leaves, grass, litter, roots, plant cards): their back face
     // sits on top of the sunlit front face, so pushing it would shade the plant itself.
     int id = int(mc_Entity.x);
-    bool thin = id == 10001 || id == 10003 || id == 10005;
+    bool thin = id == 10001 || id == 10003 || id == 10005 || id == 10006;
     if (nView.z < 0.0 && !thin) {
         // blocks per shadow texel at this vertex
         float texel = 2.0 * SHADOW_DISTANCE / float(SHADOW_MAP_RES) * warpF * warpF / (1.0 - SHADOW_WARP);
@@ -76,7 +76,7 @@ void main() {
     // pop in and out while walking across the threshold.
     float sunH = sin(sunAngle * 6.28318530718);
     if (blockDist > 2.0 * SHADOW_NEAR) {
-        if ((id == 10003 || id == 10005) && sunH > 0.5) gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
+        if ((id == 10003 || id == 10005 || id == 10006) && sunH > 0.5) gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
         if (id == 10001) solidCutout = 1;
     }
 #else
