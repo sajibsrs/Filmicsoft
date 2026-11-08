@@ -7,10 +7,11 @@ runs on macOS, Windows and Linux.
 **Download:** [Modrinth](https://modrinth.com/shader/filmicsoft) ·
 [GitHub Releases](../../releases)
 
-| ![Meadow with oak trees and melons](docs/images/meadow.webp) | ![River between grassy hills](docs/images/river.webp) |
+| ![Savanna under acacia trees](docs/images/savanna.webp) | ![Village farm in the plains](docs/images/village-farm.webp) |
 |---|---|
-| ![Village in the hills](docs/images/village-hills.webp) | ![Moonrise over the ocean](docs/images/moonrise.webp) |
-| ![Underwater seagrass](docs/images/underwater.webp) | ![Desert village by the river](docs/images/desert-river.webp) |
+| ![Sheep in a meadow](docs/images/meadow-sheep.webp) | ![House on the beach](docs/images/beach-house.webp) |
+| ![Village by the shore](docs/images/village-shore.webp) | ![Desert village by the river](docs/images/desert-river.webp) |
+| ![Underwater seagrass](docs/images/underwater.webp) | ![Moonrise over the ocean](docs/images/moonrise.webp) |
 
 ## Features
 
