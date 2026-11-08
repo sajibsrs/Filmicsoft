@@ -17,8 +17,7 @@ runs on macOS, Windows and Linux.
 **Lighting and shadows**
 - Real sun and moon shadows from a filtered shadow map, reaching 64 blocks by
   default (up to 256), with a soft sky-light shadow beyond it
-- Soft shadows that behave like real ones: crisp where an object meets the
-  ground, widening and fading with distance, so long sunset shadows melt away
+- Clean, crisp shadow edges with light antialiasing, no stair-steps
 - Shadows stay fixed to the world while you walk and look around
 - Optional shadows from mobs and grass
 - Thin blocks (leaves, plants, panes, fences) cast clean shadows without
@@ -77,7 +76,16 @@ play.
   G-buffer, no deferred pass) and bloom runs at low resolution, keeping
   memory use and bandwidth low; that also matters on laptops and integrated GPUs.
 
-## What's new in 2.4.0
+## What's new in 2.5.0
+
+- **Crisp shadows:** edges are clean and even everywhere. The blur that grew
+  with distance from the caster is gone, and with it the torn edges and the
+  pale second layer around tall shadows.
+- Grass, flowers and crops seen against the sun glow with the light passing
+  through them instead of turning dark.
+- Default sun strength is now 1.75 (was 2.00).
+
+### 2.4.0
 
 - **Shadow Distance is now set in chunks**, like Minecraft's render distance
   (1 to 32, default 4 = 64 blocks). The old blocks setting is gone, so a custom
