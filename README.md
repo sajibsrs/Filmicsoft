@@ -4,6 +4,9 @@ A high-performance, semi-realistic shader pack for Minecraft: Java Edition
 (Iris + Sodium). It adds light and atmosphere without repainting the game, and
 runs on macOS, Windows and Linux.
 
+**Download:** [Modrinth](https://modrinth.com/shader/filmicsoft) ·
+[GitHub Releases](../../releases)
+
 | ![Meadow with oak trees and melons](docs/images/meadow.webp) | ![River between grassy hills](docs/images/river.webp) |
 |---|---|
 | ![Village in the hills](docs/images/village-hills.webp) | ![Moonrise over the ocean](docs/images/moonrise.webp) |
@@ -74,7 +77,18 @@ play.
   G-buffer, no deferred pass) and bloom runs at low resolution, keeping
   memory use and bandwidth low; that also matters on laptops and integrated GPUs.
 
-## What's new in 2.3.0
+## What's new in 2.4.0
+
+- **Shadow Distance is now set in chunks**, like Minecraft's render distance
+  (1 to 32, default 4 = 64 blocks). The old blocks setting is gone, so a custom
+  shadow distance resets to the default once: set it again on the Shadows page.
+- **Shadow Resolution: Auto** (new default) picks the map size from the
+  distance, so far shadows stay about as sharp.
+- Sunset shadows stay short, and far shadows no longer flicker on hills.
+- God rays are clearer and less grainy; caustics turn off in rain.
+- Water is a softer, less milky blue; clouds are slightly see-through.
+
+### 2.3.0
 
 - **Shadows hold still.** Block and grass shadows no longer crawl or shimmer
   while you walk, and no longer switch on and off as you turn the camera. Only
@@ -167,7 +181,7 @@ play.
 
 1. Install [Iris](https://modrinth.com/mod/iris) and [Sodium](https://modrinth.com/mod/sodium).
 2. Download `Filmicsoft-<version>.zip` from the
-   [Releases](../../releases) page (or Modrinth) and drop it into
+   [Releases](../../releases) page (or [Modrinth](https://modrinth.com/shader/filmicsoft)) and drop it into
    `.minecraft/shaderpacks/`. (A zip works as is; no need to unzip it.)
 3. In game: Video Settings > Shader Packs > Filmicsoft > Apply.
 
