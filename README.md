@@ -16,14 +16,17 @@ runs on macOS, Windows and Linux.
 ## Features
 
 **Lighting and shadows**
-- Real sun and moon shadows from a filtered shadow map, reaching 64 blocks by
-  default (up to 256), with a soft sky-light shadow beyond it
+- Real sun and moon shadows from a filtered shadow map. Shadow distance is set
+  in chunks like render distance (default 4 chunks = 64 blocks, up to 32), the
+  map resolution follows it automatically, and a soft sky-light shadow takes
+  over beyond it
 - Clean, crisp shadow edges with light antialiasing, no stair-steps
 - Shadows stay fixed to the world while you walk and look around
 - Optional shadows from mobs and grass
 - Thin blocks (leaves, plants, panes, fences) cast clean shadows without
   shading themselves
-- Light filters softly through leaves, grass and vines
+- Light filters softly through leaves, grass and vines; grass, flowers and
+  crops seen against the sun glow instead of turning dark
 - Warm torch and block light; lava, glowstone, lanterns and other light
   sources glow
 - Golden mornings and evenings: the sun warms and dims toward the horizon
