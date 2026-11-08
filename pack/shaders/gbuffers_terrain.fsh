@@ -31,16 +31,7 @@ void main() {
     if (tex.a < alphaTestRef) discard;
 
     vec3 n = normalize(normal);
-    // Grass is a pair of crossed cards drawn as two faces back to back. From
-    // the side away from the sun you see the face whose normal points away
-    // from it, which the shadow lookup counts as "turned from the light" and
-    // blacks out. A blade is thin, so that face gets the sunlight that passes
-    // through it: lit as if facing the sun, at a share of the strength, so
-    // grass against the sun reads darker than grass with the sun behind you.
-    if (grassCard == 1 && dot(n, mat3(gbufferModelViewInverse) * shadowLightPosition) < 0.0) {
-        n = -n;
-        sunTransmit = 0.45;
-    }
+    grassBlade = grassCard == 1;   // thin-card lighting, see litSurface
     vec2 lm = clamp(lmcoord, 0.0, 1.0);
     float ao = glcolor.a;
 
