@@ -184,12 +184,17 @@ vec3 rolloff(vec3 c) {
 
 // Sunlight visibility 0..1 from the sky-light level, replaced by the shadow map
 // where it is trusted (sh from shadowTerm; vec2(1.0, 0.0) = no map).
+// Share of sunlight that reaches the face being shaded. 1 for every normal
+// surface; a program lowers it for the shaded side of a thin card (grass),
+// which only gets the light that passes through the blade.
+float sunTransmit = 1.0;
+
 float sunOpen(float sky, vec2 sh) {
-    float open = smoothstep(0.92, 0.99, sky);
+    float open = smoothstep(0.92, 0.99, sky) * sunTransmit;
 #ifdef ENABLE_SHADOWS
     // Real shadow where the map is trusted; the sky-light check also keeps
     // any map leak out of caves.
-    open = mix(open, sh.x * smoothstep(0.15, 0.50, sky), sh.y);
+    open = mix(open, sh.x * smoothstep(0.15, 0.50, sky) * sunTransmit, sh.y);
 #endif
     return open;
 }
