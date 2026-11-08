@@ -36,7 +36,7 @@
 #define GRAIN_AMOUNT 0.005        // [0.000 0.0025 0.005 0.0075 0.010]
 
 // ---- Lighting (forward, in the geometry programs) ---------------------------
-#define SUN_INTENSITY 2.00     // [1.00 1.25 1.50 1.75 2.00 2.25 2.50 3.00]  noon strength; low sun is scaled down automatically
+#define SUN_INTENSITY 1.75     // [1.00 1.25 1.50 1.75 2.00 2.25 2.50 3.00]  noon strength; low sun is scaled down automatically
 #define AMBIENT_INTENSITY 1.00 // [0.00 0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00]
 #define MOON_BRIGHTNESS 0.50    // [0.00 0.50 0.75 1.00 1.50 2.00 3.00]
 
