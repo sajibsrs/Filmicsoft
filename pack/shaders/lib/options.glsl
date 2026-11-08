@@ -41,15 +41,71 @@
 #define MOON_BRIGHTNESS 0.50    // [0.00 0.50 0.75 1.00 1.50 2.00 3.00]
 
 // ---- Shadows (only used when ENABLE_SHADOWS is on) -------------------------
-// Map covers SHADOW_DISTANCE blocks around the player; beyond it the sky-light
-// fake shadow takes over (cross-faded). Texel size = 2 * distance / resolution.
+// Map covers SHADOW_CHUNKS chunks (SHADOW_DISTANCE blocks) around the player; beyond it the sky-light
+// fake shadow takes over (cross-faded). Texel size = 2 * distance / SHADOW_MAP_RES.
 // Detail is kept near the player, whatever the distance: the map is warped
 // (SHADOW_WARP), and while the sun is high, small casters (grass, plants, thin
 // blocks) stop casting past SHADOW_NEAR * 2. At low sun their shadows are long
 // and they keep casting.
 #define SHADOW_NEAR 16.0
-#define SHADOW_DISTANCE 64       // [16 24 36 48 64 96 128 192 256]  blocks
-#define SHADOW_RESOLUTION 1024   // [256 512 1024 2048 4096]
+#define SHADOW_CHUNKS 4          // [1 2 3 4 6 8 12 16 20 24 32]  chunks, like Minecraft's render distance (1 chunk = 16 blocks)
+// The same distance in blocks, as a plain literal: Iris reads shadowDistance
+// straight from the source and does not evaluate an expression like 4 * 16.
+// SHADOW_DEPTH is how far the map reaches along the light, toward the sun and
+// away from it. A fixed 576 blocks each way at every distance (768 at 32
+// chunks): with Iris's default reach (100 toward, 156 away) a thin, crisp
+// "stick" line flicked across stepped cliffs at low sun; the longer reach
+// removes it.
+#if SHADOW_CHUNKS == 1
+#define SHADOW_DISTANCE 16
+#elif SHADOW_CHUNKS == 2
+#define SHADOW_DISTANCE 32
+#elif SHADOW_CHUNKS == 3
+#define SHADOW_DISTANCE 48
+#elif SHADOW_CHUNKS == 6
+#define SHADOW_DISTANCE 96
+#elif SHADOW_CHUNKS == 8
+#define SHADOW_DISTANCE 128
+#elif SHADOW_CHUNKS == 12
+#define SHADOW_DISTANCE 192
+#elif SHADOW_CHUNKS == 16
+#define SHADOW_DISTANCE 256
+#elif SHADOW_CHUNKS == 20
+#define SHADOW_DISTANCE 320
+#elif SHADOW_CHUNKS == 24
+#define SHADOW_DISTANCE 384
+#elif SHADOW_CHUNKS == 32
+#define SHADOW_DISTANCE 512
+#define SHADOW_DEPTH 768.0
+#define SHADOW_DEPTH_NEG -768.0
+#else
+#define SHADOW_DISTANCE 64
+#endif
+#ifndef SHADOW_DEPTH
+#define SHADOW_DEPTH 576.0
+#define SHADOW_DEPTH_NEG -576.0
+#endif
+#define SHADOW_RESOLUTION 0      // [0 512 1024 2048 4096]  0 = Auto: follows Shadow Distance
+// The map size actually used, as a plain literal (Iris reads shadowMapResolution
+// from the source). Auto: under 4 chunks 512, 4+ 1024, 8+ 2048, 16+ 4096, so a
+// longer distance keeps roughly the same shadow sharpness.
+#if SHADOW_RESOLUTION == 512
+#define SHADOW_MAP_RES 512
+#elif SHADOW_RESOLUTION == 1024
+#define SHADOW_MAP_RES 1024
+#elif SHADOW_RESOLUTION == 2048
+#define SHADOW_MAP_RES 2048
+#elif SHADOW_RESOLUTION == 4096
+#define SHADOW_MAP_RES 4096
+#elif SHADOW_CHUNKS >= 16
+#define SHADOW_MAP_RES 4096
+#elif SHADOW_CHUNKS >= 8
+#define SHADOW_MAP_RES 2048
+#elif SHADOW_CHUNKS >= 4
+#define SHADOW_MAP_RES 1024
+#else
+#define SHADOW_MAP_RES 512
+#endif
 #define SHADOW_AA                // shadow edge antialiasing: off = hard, stair-stepped edges. Tap count follows SHADOW_SOFTNESS
 #define SHADOW_ENTITIES          // Mobs and items cast shadows too (every entity is drawn a second time: costs CPU)
 #define SHADOW_GRASS             // Grass and ferns cast shadows (dense fields put many extra cutout quads in the shadow map: costs GPU)
@@ -59,11 +115,12 @@
 #define HAZE_AMOUNT 0.50         // [0.00 0.50 1.00 1.50 2.00]
 #define RAIN_MOOD 1.00           // [0.00 0.50 1.00 1.50 2.00]  rain look: cooler, flatter colour, thicker haze, wet darker ground (0 = vanilla-like rain)
 
-// ---- Debug (terrain only): 1 vertex color, 2 AO, 3 normals, 4 lightmap ----
-#define DEBUG_VIEW 0             // [0 1 2 3 4]
+// ---- Debug (terrain only): 1 vertex color, 2 AO, 3 normals, 4 lightmap, 5 shadow map ----
+#define DEBUG_VIEW 0             // [0 1 2 3 4 5]
 
 // Fixed look, not exposed as sliders.
-#define CLOUD_LIGHTING 1.00      // sun-angle shading of clouds, warm sides and undersides at sunrise / sunset
+#define CLOUD_OPACITY 0.75       // clouds are 25% see-through
+#define CLOUD_LIGHTING 1.00     // sun-angle shading of clouds, warm sides and undersides at sunrise / sunset
 #define HORIZON_MIST 0.60        // pale haze band where the sky meets the horizon (far clouds and terrain fade into it)
 #define CAL_RED 0.00
 #define CAL_GREEN 0.10
@@ -104,6 +161,7 @@
 #define AO_STRENGTH 3.00
 #define SHADOW_WARP 0.75  // shadow map warp: texels near the player are 1/(1-this) times denser (4x), far ones coarser; same cost
 #define SHADOW_YAW 25.0  // degrees the shadow light is turned from the real sun around the vertical axis (0 = true direction)
+#define SHADOW_MIN_ELEVATION 22.0  // degrees; the shadow light never drops lower, so sunset shadows stay under ~2.5x their caster
 #define SHADOW_SOFTNESS 1.0  // blur radius of the shadow edge, in shadow-map texels (0 = no blur)
 #define CLOUD_DISTANCE 5.0  // cloud fade length, in render distances (higher = clouds reach the horizon)
 #define HAZE_SUN_GLOW 0.50

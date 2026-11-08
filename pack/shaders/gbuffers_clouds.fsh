@@ -62,6 +62,7 @@ void main() {
     // far cloud boxes dissolve instead of showing as pale flat blocks.
     c.rgb = mix(c.rgb, skyGradient(viewPos / max(dist, 0.0001)), smoothstep(0.30, 1.00, t));
     c.a *= 1.0 - smoothstep(0.55, 1.00, t);
+    c.a *= CLOUD_OPACITY;
     if (c.a < 0.01) discard;
 
     outColor = c;

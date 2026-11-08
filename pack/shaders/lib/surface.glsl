@@ -29,6 +29,11 @@ vec3 litSurface(vec3 albedoGamma, vec2 lm, vec3 nWS, float ao, float foliage, fl
 #ifdef ENABLE_SHADOWS
     if (useShadowMap) sh = shadowTerm(feet, nWS);
 #endif
+#if DEBUG_VIEW == 5
+    // Shadow map only: white = lit, black = shadowed, blue = map not used here
+    // (past the distance, low sun, night), so the sky-light fallback applies.
+    return mix(vec3(0.15, 0.25, 0.85), vec3(sh.x), sh.y);
+#endif
     vec3 rgb = shadeSurface(albedoGamma, lm, nWS, ao, foliage, emissive, sh);
 #if SURFACE_SHEEN > 0
     rgb += sunSheen(nWS, feet, lm.y, sh) * (1.0 - emissive);
@@ -51,6 +56,7 @@ vec3 litSurface(vec3 albedoGamma, vec2 lm, vec3 nWS, float ao, float foliage, fl
         // Sky light falls about a level per block of water, so a seabed a few
         // blocks down is already well below 0.9: the gate starts low.
         float lit = smoothstep(0.10, 0.60, lm.y) * smoothstep(0.0, 0.30, h)
+                  * (1.0 - rainStrength)                    // overcast: no sun to focus
                   * mix(1.0, sh.x, sh.y)                    // not inside a shadow
                   * (0.35 + 0.65 * clamp(nWS.y, 0.0, 1.0)) * (1.0 - emissive);
         if (lit > 0.0) {

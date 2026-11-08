@@ -43,10 +43,18 @@ vec2 rippleSlope(vec2 xz, vec2 drift) {
 
 void main() {
     vec4 tex = texture(gtexture, texcoord);
-    // Terrain programs carry vertex AO in glcolor.a (separateAo=true).
-    vec3 lit = shadeSurface(tex.rgb * glcolor.rgb, clamp(lmcoord, 0.0, 1.0),
-                            normalize(normal), glcolor.a, 0.0, 0.0, vec2(1.0, 0.0));
+    vec3 albedo = tex.rgb * glcolor.rgb;
     float alpha = tex.a;
+    if (isWater == 1) {
+        // Vanilla's biome water tint, lit like a solid block in full sun, reads
+        // as a milky sky-blue sheet. Take out some saturation and brightness.
+        // Opacity stays vanilla: more see-through made shallow water vanish.
+        float l = dot(albedo, vec3(0.2126, 0.7152, 0.0722));
+        albedo = mix(albedo, vec3(l), 0.30) * 0.85;
+    }
+    // Terrain programs carry vertex AO in glcolor.a (separateAo=true).
+    vec3 lit = shadeSurface(albedo, clamp(lmcoord, 0.0, 1.0),
+                            normalize(normal), glcolor.a, 0.0, 0.0, vec2(1.0, 0.0));
 
     // Water mirrors the sky above it, more at grazing angles (Fresnel). The
     // reflected sky is the same gradient the sky is drawn with, so sunsets and

@@ -55,7 +55,7 @@ void main() {
     bool thin = id == 10001 || id == 10003 || id == 10005;
     if (nView.z < 0.0 && !thin) {
         // blocks per shadow texel at this vertex
-        float texel = 2.0 * SHADOW_DISTANCE / float(SHADOW_RESOLUTION) * warpF * warpF / (1.0 - SHADOW_WARP);
+        float texel = 2.0 * SHADOW_DISTANCE / float(SHADOW_MAP_RES) * warpF * warpF / (1.0 - SHADOW_WARP);
         // Capped in blocks: at long range a texel is up to half a block, and a full
         // block of push makes ledges throw a dark line onto the step below.
         gl_Position.z += min(2.0 * texel, 0.25) * gl_ProjectionMatrix[2][2];

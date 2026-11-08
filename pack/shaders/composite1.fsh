@@ -72,7 +72,11 @@ vec3 godRays(vec2 uv) {
     vec2 delta = (sunUV - uv) / float(GODRAY_SAMPLES);   // march all the way to the sun
     // Per-pixel start offset turns step banding into noise that the upsample,
     // FXAA and film grain hide.
-    float jitter = fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715))));
+    // A 2x2 ordered pattern, not free noise: the 2x2 blur in final then sees
+    // all four offsets in every footprint, so it acts as 4x the taps instead of
+    // leaving grain where the march steps are long (far from the sun).
+    ivec2 cell = ivec2(gl_FragCoord.xy) & 1;
+    float jitter = (float(cell.x * 2 + (cell.x ^ cell.y)) + 0.5) * 0.25;
     vec2 p = uv + delta * jitter;
     float open = 0.0;
     for (int i = 0; i < GODRAY_SAMPLES; i++) {
@@ -81,6 +85,9 @@ vec3 godRays(vec2 uv) {
         open += (inside && texture(depthtex0, p).r >= 1.0) ? 1.0 : 0.0;
     }
     open /= float(GODRAY_SAMPLES);
+    // Contrast: a shaft and the gap beside it differ by only a few taps, so
+    // the plain average reads as an even glow. Smoothstep pulls them apart.
+    open = open * open * (3.0 - 2.0 * open) * 0.85;
 
     vec3 tint = mix(vec3(1.00, 0.93, 0.80), vec3(1.00, 0.55, 0.25), lowSun);
 

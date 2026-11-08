@@ -17,9 +17,14 @@ uniform vec3 fogColor;
 
 #ifdef ENABLE_SHADOWS
 // Read by Iris to size the shadow pass.
-const int shadowMapResolution = SHADOW_RESOLUTION;
+const int shadowMapResolution = SHADOW_MAP_RES;
 const float shadowDistance = SHADOW_DISTANCE;
 const float shadowDistanceRenderMul = 1.0;   // don't draw terrain beyond shadowDistance into the map
+#ifdef SHADOW_DEPTH
+// The map's depth range along the light (see SHADOW_DEPTH in options.glsl).
+const float shadowNearPlane = SHADOW_DEPTH_NEG;
+const float shadowFarPlane = SHADOW_DEPTH;
+#endif
 // The map re-centres on the player only every 4 blocks (Iris default 2). The warp
 // is centred on the map, so each re-centre shifts every edge's texels; fewer
 // re-centres means shadows hold still while walking.
@@ -45,6 +50,17 @@ vec2 shadowTerm(vec3 feet, vec3 nWS) {
     float w = (1.0 - smoothstep(0.85 * SHADOW_DISTANCE, 0.98 * SHADOW_DISTANCE, dist))
             * smoothstep(0.05, 0.25, h);
     if (w <= 0.0) return vec2(1.0, 0.0);
+    // Where a texel is bigger than a block, the map can't resolve block shadows and
+    // the biases (capped in blocks) can't hold back acne: it only flickers as the
+    // map re-centres. Hand over to the sky-light shadow there. Never reached at
+    // 64 blocks / 1024 (texel <= 0.5); at 256 / 1024 it starts near 125 blocks.
+    {
+        vec2 ndc0 = (shadowProjection * (shadowModelView * vec4(shadowYawPos(feet), 1.0))).xy;
+        float f0 = length(ndc0) * SHADOW_WARP + (1.0 - SHADOW_WARP);
+        float texel0 = 2.0 * SHADOW_DISTANCE / float(SHADOW_MAP_RES) * f0 * f0 / (1.0 - SHADOW_WARP);
+        w *= 1.0 - smoothstep(0.75, 1.5, texel0);
+        if (w <= 0.0) return vec2(1.0, 0.0);
+    }
 
     // Work in the frame the map was rendered in (see shadowyaw.glsl).
     mat3 yaw = shadowYaw();
@@ -57,7 +73,7 @@ vec2 shadowTerm(vec3 feet, vec3 nWS) {
     // uniform grid, and 'texel' below is the local size here.
     vec2 ndcFeet = (shadowProjection * (shadowModelView * vec4(feet, 1.0))).xy;
     float warpF = length(ndcFeet) * SHADOW_WARP + (1.0 - SHADOW_WARP);
-    float texel = 2.0 * SHADOW_DISTANCE / float(SHADOW_RESOLUTION) * warpF * warpF / (1.0 - SHADOW_WARP);   // blocks per shadow texel here
+    float texel = 2.0 * SHADOW_DISTANCE / float(SHADOW_MAP_RES) * warpF * warpF / (1.0 - SHADOW_WARP);   // blocks per shadow texel here
     float slope = min(sqrt(max(1.0 - ndl * ndl, 0.0)) / max(ndl, 0.15), 4.0);
 
     // Normal offset (kills acne on faces that graze the light) + slope-scaled depth bias.
@@ -74,21 +90,28 @@ vec2 shadowTerm(vec3 feet, vec3 nWS) {
     // every concave corner at low sun). It still grows with slope and blur radius, and
     // the radius floor of 0.5 keeps zero softness from bringing acne back.
     sc.z -= texel * (0.1 + 0.25 * slope * max(SHADOW_SOFTNESS, 0.5)) * 0.5 * abs(shadowProjection[2][2]);
-
 #ifndef SHADOW_AA
     // Antialiasing off: sampling at a texel centre gives the 2x2 hardware filter
     // full weight on one texel, so the edge is the raw shadow-map staircase.
-    sc.xy = (floor(sc.xy * float(SHADOW_RESOLUTION)) + 0.5) / float(SHADOW_RESOLUTION);
+    sc.xy = (floor(sc.xy * float(SHADOW_MAP_RES)) + 0.5) / float(SHADOW_MAP_RES);
     float vis = texture(shadowtex1, sc);
 #else
     // The sun is a disk, not a point, so a shadow's edge widens and fades with
     // distance from its caster: a sugar cane's shadow melts away a few blocks
     // out, a hill's keeps a dark core with a soft rim. Find the caster depth
     // with a few raw taps, then grow the blur radius with the gap.
-    const float SEARCH = 8.0;            // blocker search and widest blur, in texels
-    const float PENUMBRA = 0.015;        // blur radius in blocks per block of gap (~3x the real sun, reads better at game scale)
+    // Search and widest blur are capped in BLOCKS, not texels. At long shadow
+    // distances a far texel is up to 2 blocks, and an 8-texel disk (16 blocks)
+    // on a hillside counts the slope itself as a caster: blotchy self-shadow
+    // that shifted with every map re-centre (flicker, long smears on hills).
+    // Blur radius in blocks per block of gap, ~4x the real sun. A block's shadow
+    // stays sharp at its base and only softens toward the far end. 0.04 washed
+    // a thin caster (the player, a post) out to a faint smear at low sun; 0.015
+    // left a fence post's shadow a crisp line many blocks out.
+    const float PENUMBRA = 0.02;
+    float SEARCH = clamp(1.0 / texel, 1.0, 8.0);   // texels spanning ~1 block, 8 at most
     float depthPerBlock = 0.5 * abs(shadowProjection[2][2]);
-    float uvTexel = 1.0 / float(SHADOW_RESOLUTION);
+    float uvTexel = 1.0 / float(SHADOW_MAP_RES);
     float zSum = 0.0, nBlock = 0.0;
     for (int k = 0; k < 4; k++) {
         float a = float(k) * 1.57079632679 + 0.785398163;
@@ -112,14 +135,15 @@ vec2 shadowTerm(vec3 feet, vec3 nWS) {
         // Early out: a few spread-out taps first; if they all agree the pixel is
         // fully lit or fully shadowed, skip the rest. Only penumbra pixels pay.
         const int SHADOW_SAMPLES = 32;
+        // The early taps are their own cross, 90 degrees apart at 0.75 radius.
+        // Every 8th Vogel tap is NOT spread out: 8 x 137.5 deg is only 20 deg
+        // after full turns, so those 4 sat in one 60-degree fan, missed edges on
+        // the other side and left crisp one-sided teeth along shadow edges.
         const int FIRST = 4;
-        const int STRIDE = SHADOW_SAMPLES / FIRST;
         vis = 0.0;
         for (int k = 0; k < FIRST; k++) {
-            int i = k * STRIDE + STRIDE / 2;
-            float a = float(i) * 2.39996323;
-            float r = sqrt((float(i) + 0.5) / float(SHADOW_SAMPLES)) * radius;
-            vis += texture(shadowtex1, vec3(sc.xy + r * vec2(cos(a), sin(a)), sc.z));
+            float a = float(k) * 1.57079632679 + 0.785398163;
+            vis += texture(shadowtex1, vec3(sc.xy + 0.75 * radius * vec2(cos(a), sin(a)), sc.z));
         }
         vis /= float(FIRST);
         if (vis > 0.001 && vis < 0.999) {

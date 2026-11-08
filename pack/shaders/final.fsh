@@ -188,7 +188,14 @@ void main() {
     // God rays: already tinted and scaled, so a single bilinear upsample.
     // Screen blend, so bright sky by the sun approaches white instead of clipping.
 #ifdef ENABLE_GODRAYS
-    col += texture(colortex11, uv).rgb * max(1.0 - col, 0.0);
+    // Four diagonal taps one half-res texel out: averages away the per-pixel
+    // march jitter, which a single bilinear read leaves as a crosshatch.
+    vec2 gs = 2.0 / vec2(viewWidth, viewHeight);
+    vec3 shafts = (texture(colortex11, uv + gs * vec2( 0.5,  0.5)).rgb
+                 + texture(colortex11, uv + gs * vec2(-0.5,  0.5)).rgb
+                 + texture(colortex11, uv + gs * vec2( 0.5, -0.5)).rgb
+                 + texture(colortex11, uv + gs * vec2(-0.5, -0.5)).rgb) * 0.25;
+    col += shafts * max(1.0 - col, 0.0);
 #endif
 
     float luma;

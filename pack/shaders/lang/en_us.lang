@@ -27,7 +27,7 @@ option.AMBIENT_INTENSITY=Sky Ambient
 option.MOON_BRIGHTNESS=Moon / Night Brightness
 option.HAZE_AMOUNT=Distance Haze
 option.RAIN_MOOD=Rain Atmosphere
-option.DEBUG_VIEW=Debug View (0 off, 1 color, 2 AO, 3 normals, 4 light)
+option.DEBUG_VIEW=Debug View (0 off, 1 color, 2 AO, 3 normals, 4 light, 5 shadow map)
 
 screen.EFFECTS=Effects
 screen.ENVIRONMENT=Environment
@@ -45,8 +45,9 @@ option.ENABLE_FXAA=Anti-Aliasing (FXAA)
 
 screen.SHADOWS=Shadows
 option.ENABLE_SHADOWS=Shadow Map
-option.SHADOW_DISTANCE=Shadow Distance (blocks)
+option.SHADOW_CHUNKS=Shadow Distance (chunks)
 option.SHADOW_RESOLUTION=Shadow Resolution
+value.SHADOW_RESOLUTION.0=Auto
 option.SHADOW_AA=Shadow Antialiasing
 option.SHADOW_ENTITIES=Mobs Shadow
 option.SHADOW_GRASS=Grass Shadow
