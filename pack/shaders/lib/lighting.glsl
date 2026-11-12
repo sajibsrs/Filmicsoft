@@ -212,6 +212,10 @@ vec3 shadeSurface(vec3 albedoGamma, vec2 lm, vec3 nWS, float ao, float foliage, 
     float lowSun = 1.0 - smoothstep(0.0, 0.5, h);
     float dayScale = mix(1.0, mix(1.0, 0.40, lowSun), dayAmt);
 
+    // Sun colour: white-warm at noon, orange at sunrise / sunset. Also tints
+    // the ground bounce below.
+    vec3 sunCol = mix(vec3(1.00, 0.93, 0.80), vec3(1.00, 0.58, 0.22), warm) * SUN_INTENSITY;
+
     // ---- Direct light (sun by day, moon by night) --------------------------
     vec3 direct = vec3(0.0);
     if (hasSkylight) {
@@ -229,7 +233,6 @@ vec3 shadeSurface(vec3 albedoGamma, vec2 lm, vec3 nWS, float ao, float foliage, 
         // Fake shadow from the sky-light level: open sky is 15, one leaf
         // layer or an overhang above drops it to 14 (0.935), which is shade.
         float open = sunOpen(sky, sh);
-        vec3 sunCol = mix(vec3(1.00, 0.93, 0.80), vec3(1.00, 0.58, 0.22), warm) * SUN_INTENSITY;
         vec3 moonCol = vec3(0.42, 0.55, 1.00) * 0.10 * MOON_BRIGHTNESS;
         vec3 directCol = (moonCol * diffM * (1.0 - dayAmt) + sunCol * diffS * dayAmt) * (1.0 - 0.9 * rain);
         direct = directCol * open * mix(1.0, aoT, 0.5) * dayScale;
@@ -243,7 +246,14 @@ vec3 shadeSurface(vec3 albedoGamma, vec2 lm, vec3 nWS, float ao, float foliage, 
         vec3 ambNight = vec3(0.045, 0.060, 0.115) * MOON_BRIGHTNESS;
         vec3 amb = mix(ambNight, mix(ambDay, ambSet, warm), dayAmt) * dayScale;
         amb = mix(amb, vec3(dot(amb, LIGHT_LUMA)) * 0.9, rain * 0.6) * (1.0 - 0.25 * rain);
-        vec3 ground = amb * vec3(0.55, 0.50, 0.45);
+        // Bounce off the ground carries the sun's colour: orange at golden hour,
+        // near-neutral at noon, none under rain or at night. Hue only: the tint
+        // is renormalised to the fixed one's luma, so shade stays as bright as
+        // before and only its colour follows the sun.
+        vec3 groundTint = vec3(0.55, 0.50, 0.45);
+        vec3 sunTint = groundTint * sunCol;
+        sunTint *= dot(groundTint, LIGHT_LUMA) / max(dot(sunTint, LIGHT_LUMA), 1e-4);
+        vec3 ground = amb * mix(groundTint, sunTint, dayAmt * (1.0 - rain));
         float hemi = nWS.y * 0.5 + 0.5;
         ambient = mix(ground, amb, hemi) * pow(sky, 1.8) * aoT * AMBIENT_INTENSITY;
     }
