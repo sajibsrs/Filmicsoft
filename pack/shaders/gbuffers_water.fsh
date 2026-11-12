@@ -1,7 +1,10 @@
 #version 330 compatibility
 
 // Translucent terrain (water, stained glass, ice). Lit directly with the same
-// model as opaque surfaces, minus the shadow map (it holds opaque casters only).
+// model as opaque surfaces, shadow map included: translucents receive shadows
+// (a house's shadow runs on across the pond instead of stopping at the shore)
+// but never cast them, since the map holds opaque casters only. That also
+// means no self-shadowing here, so no acne on the water surface.
 
 #include "/lib/options.glsl"
 #include "/lib/lighting.glsl"
@@ -52,15 +55,21 @@ void main() {
         float l = dot(albedo, vec3(0.2126, 0.7152, 0.0722));
         albedo = mix(albedo, vec3(l), 0.30) * 0.85;
     }
+    vec3 nWS = normalize(normal);
+    // Sun shadow from the map where it is trusted, the sky-light fake elsewhere
+    // (shadowTerm fades it out past the distance, at low sun and at night).
+    vec2 sh = vec2(1.0, 0.0);
+#ifdef ENABLE_SHADOWS
+    sh = shadowTerm((gbufferModelViewInverse * vec4(viewPos, 1.0)).xyz, nWS);
+#endif
     // Terrain programs carry vertex AO in glcolor.a (separateAo=true).
-    vec3 lit = shadeSurface(albedo, clamp(lmcoord, 0.0, 1.0),
-                            normalize(normal), glcolor.a, 0.0, 0.0, vec2(1.0, 0.0));
+    vec3 lit = shadeSurface(albedo, clamp(lmcoord, 0.0, 1.0), nWS, glcolor.a, 0.0, 0.0, sh);
 
     // Water mirrors the sky above it, more at grazing angles (Fresnel). The
     // reflected sky is the same gradient the sky is drawn with, so sunsets and
     // storms show up on lakes for free. Top faces under open sky only: covered
-    // water and caves have no sky to reflect.
-    vec3 nWS = normalize(normal);
+    // water and caves have no sky to reflect. The reflection is not shadowed:
+    // the sky is just as visible in a mirror that lies in shade.
     if (isWater == 1 && hasSkylight && nWS.y > 0.5) {
         vec3 V = normalize(viewPos);
 #ifdef ENABLE_WATER_RIPPLES
