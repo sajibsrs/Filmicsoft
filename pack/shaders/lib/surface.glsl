@@ -17,6 +17,9 @@ bool isPlantCard = false;
 vec3 litSurface(vec3 albedoGamma, vec2 lm, vec3 nWS, float ao, float foliage, float emissive,
                 vec3 viewPos, bool useShadowMap) {
     vec3 feet = (gbufferModelViewInverse * vec4(viewPos, 1.0)).xyz;
+#ifdef ENABLE_HELD_LIGHT
+    lm.x = max(lm.x, heldLight(feet));
+#endif
 
     // Rain: open, upward-facing surfaces get wet. Wet ground is darker (water
     // fills the pores) and mirrors a little of the grey sky at grazing angles.

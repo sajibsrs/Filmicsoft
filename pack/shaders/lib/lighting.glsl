@@ -17,6 +17,23 @@ uniform float rainStrength;
 uniform bool hasSkylight;
 uniform vec3 fogColor;
 
+#ifdef ENABLE_HELD_LIGHT
+uniform int heldBlockLightValue;    // light level of the main-hand item (torch 14, 0 if none)
+uniform int heldBlockLightValue2;   // off hand
+// Block-light level (0..1, lightmap units) a held light source gives a surface
+// at 'feet' (player space). Falls one level per block like vanilla's own block
+// light, so a torch in hand reaches as far as a placed one, and callers take
+// max() with the lightmap so a placed torch next to it does not double up.
+// The level then goes through the same warm block-light colour and curve.
+float heldLight(vec3 feet) {
+    float v = float(max(heldBlockLightValue, heldBlockLightValue2));
+    if (v <= 0.0) return 0.0;
+    // Camera is at eye height; the hand is ~1 block below and to the side, so
+    // the floor under the player reads about 1.5 blocks away as vanilla would.
+    return clamp((v - length(feet)) / 15.0, 0.0, 1.0);
+}
+#endif
+
 #ifdef ENABLE_SHADOWS
 // Read by Iris to size the shadow pass.
 const int shadowMapResolution = SHADOW_MAP_RES;

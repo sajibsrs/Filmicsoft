@@ -42,6 +42,7 @@ option.ENABLE_UNDERWATER=Underwater Look
 option.ENABLE_CAUSTICS=Caustics
 option.ENABLE_GRAIN=Film Grain
 option.ENABLE_FXAA=Anti-Aliasing (FXAA)
+option.ENABLE_HELD_LIGHT=Held Torch Light
 
 screen.SHADOWS=Shadows
 option.ENABLE_SHADOWS=Shadow Map

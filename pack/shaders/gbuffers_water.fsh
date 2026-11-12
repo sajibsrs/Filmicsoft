@@ -56,14 +56,19 @@ void main() {
         albedo = mix(albedo, vec3(l), 0.30) * 0.85;
     }
     vec3 nWS = normalize(normal);
+    vec3 feet = (gbufferModelViewInverse * vec4(viewPos, 1.0)).xyz;
+    vec2 lm = clamp(lmcoord, 0.0, 1.0);
+#ifdef ENABLE_HELD_LIGHT
+    lm.x = max(lm.x, heldLight(feet));
+#endif
     // Sun shadow from the map where it is trusted, the sky-light fake elsewhere
     // (shadowTerm fades it out past the distance, at low sun and at night).
     vec2 sh = vec2(1.0, 0.0);
 #ifdef ENABLE_SHADOWS
-    sh = shadowTerm((gbufferModelViewInverse * vec4(viewPos, 1.0)).xyz, nWS);
+    sh = shadowTerm(feet, nWS);
 #endif
     // Terrain programs carry vertex AO in glcolor.a (separateAo=true).
-    vec3 lit = shadeSurface(albedo, clamp(lmcoord, 0.0, 1.0), nWS, glcolor.a, 0.0, 0.0, sh);
+    vec3 lit = shadeSurface(albedo, lm, nWS, glcolor.a, 0.0, 0.0, sh);
 
     // Water mirrors the sky above it, more at grazing angles (Fresnel). The
     // reflected sky is the same gradient the sky is drawn with, so sunsets and

@@ -12,6 +12,7 @@
 #define ENABLE_UNDERWATER        // Underwater look: colour absorption and teal fog (off = vanilla water fog)
 #define ENABLE_CAUSTICS          // Drifting light pattern on sunlit surfaces under water (only costs while submerged)
 #define ENABLE_SHADOWS           // Real sun/moon shadow map (extra geometry pass + filtered lookups; off = sky-light fake shadow)
+#define ENABLE_HELD_LIGHT        // A torch (or any light block) in hand lights nearby surfaces, warm block-light colour (a dozen ALU ops per fragment)
 
 // ---- Grading ---------------------------------------------------------------
 #define EXPOSURE 1.00            // [0.50 0.60 0.70 0.80 0.90 1.00 1.10 1.20 1.30 1.40 1.50]
