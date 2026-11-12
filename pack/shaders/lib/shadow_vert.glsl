@@ -37,8 +37,11 @@ void main() {
     // Same sway as the terrain pass, so shadows stay attached to the plants.
     playerPos += waveOffset(playerPos + cameraPosition, int(mc_Entity.x), texcoord);
 #endif
+    // One yaw build, used for the position (pivot on the map origin, see
+    // shadowyaw.glsl) and the normal below.
     mat3 yaw = shadowYaw();
-    gl_Position = gl_ProjectionMatrix * (shadowModelView * vec4(shadowYawPos(playerPos), 1.0));
+    vec3 pivot = shadowModelViewInverse[3].xyz;
+    gl_Position = gl_ProjectionMatrix * (shadowModelView * vec4(yaw * (playerPos - pivot) + pivot, 1.0));
     // Warp the map toward the player: xy is divided by f, so texels near the
     // camera are 1/(1-SHADOW_WARP) times denser. shadowTerm applies the same warp.
     float warpF = length(gl_Position.xy) * SHADOW_WARP + (1.0 - SHADOW_WARP);

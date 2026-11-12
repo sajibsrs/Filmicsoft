@@ -57,30 +57,27 @@ vec2 shadowTerm(vec3 feet, vec3 nWS) {
     float lightUp = smoothstep(0.05, 0.25, h) + smoothstep(0.25, 0.40, -h);
     float w = (1.0 - smoothstep(0.85 * SHADOW_DISTANCE, 0.98 * SHADOW_DISTANCE, dist)) * lightUp;
     if (w <= 0.0) return vec2(1.0, 0.0);
+    // Work in the frame the map was rendered in (see shadowyaw.glsl). Built once:
+    // the yaw matrix depends only on uniforms, and the pivot is the map's origin.
+    mat3 yaw = shadowYaw();
+    vec3 pivot = shadowModelViewInverse[3].xyz;
+    feet = yaw * (feet - pivot) + pivot;
+    nWS = yaw * nWS;
+    // The map is warped toward the player (shadow_vert does the same): xy is divided
+    // by f, so texels near the camera are 1/(1-SHADOW_WARP) times denser than the
+    // uniform grid, and 'texel' is the local size here, in blocks.
+    vec2 ndcFeet = (shadowProjection * (shadowModelView * vec4(feet, 1.0))).xy;
+    float warpF = length(ndcFeet) * SHADOW_WARP + (1.0 - SHADOW_WARP);
+    float texel = 2.0 * SHADOW_DISTANCE / float(SHADOW_MAP_RES) * warpF * warpF / (1.0 - SHADOW_WARP);
     // Where a texel is bigger than a block, the map can't resolve block shadows and
     // the biases (capped in blocks) can't hold back acne: it only flickers as the
     // map re-centres. Hand over to the sky-light shadow there. Never reached at
     // 64 blocks / 1024 (texel <= 0.5); at 256 / 1024 it starts near 125 blocks.
-    {
-        vec2 ndc0 = (shadowProjection * (shadowModelView * vec4(shadowYawPos(feet), 1.0))).xy;
-        float f0 = length(ndc0) * SHADOW_WARP + (1.0 - SHADOW_WARP);
-        float texel0 = 2.0 * SHADOW_DISTANCE / float(SHADOW_MAP_RES) * f0 * f0 / (1.0 - SHADOW_WARP);
-        w *= 1.0 - smoothstep(0.75, 1.5, texel0);
-        if (w <= 0.0) return vec2(1.0, 0.0);
-    }
+    w *= 1.0 - smoothstep(0.75, 1.5, texel);
+    if (w <= 0.0) return vec2(1.0, 0.0);
 
-    // Work in the frame the map was rendered in (see shadowyaw.glsl).
-    mat3 yaw = shadowYaw();
-    feet = shadowYawPos(feet);
-    nWS = yaw * nWS;
     vec3 L = normalize(mat3(gbufferModelViewInverse) * shadowLightPosition);
     float ndl = dot(nWS, L);
-    // The map is warped toward the player (shadow.vsh does the same): xy is divided
-    // by f, so texels near the camera are 1/(1-SHADOW_WARP) times denser than the
-    // uniform grid, and 'texel' below is the local size here.
-    vec2 ndcFeet = (shadowProjection * (shadowModelView * vec4(feet, 1.0))).xy;
-    float warpF = length(ndcFeet) * SHADOW_WARP + (1.0 - SHADOW_WARP);
-    float texel = 2.0 * SHADOW_DISTANCE / float(SHADOW_MAP_RES) * warpF * warpF / (1.0 - SHADOW_WARP);   // blocks per shadow texel here
     float slope = min(sqrt(max(1.0 - ndl * ndl, 0.0)) / max(ndl, 0.15), 4.0);
 
     // Normal offset (kills acne on faces that graze the light) + slope-scaled depth bias.
