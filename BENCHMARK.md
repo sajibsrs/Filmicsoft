@@ -104,6 +104,26 @@ deferred-era table above because lighting and the shadow-map lookups now run in
 the geometry pass; the post chain is unchanged. The harness draws terrain as one
 fullscreen layer and does not include the shadow pass.
 
+### Solid / cutout program split (2026-11-12)
+
+Iris draws Sodium's solid terrain layer through `gbuffers_terrain_solid` and
+`shadow_solid` when a pack provides them. Those variants have no alpha test,
+so the GPU can reject hidden solid fragments before shading them (a shader
+with `discard` cannot be hidden-surface-removed on tile-based GPUs). Debug
+View 6 shows the routing: solid red, cutout green.
+
+Same-spot A/B in a flat tall-grass savanna (shadows and entity casters on):
+
+| Pack | FPS | avg | 1% low |
+|---|---|---|---|
+| Without the split | 111 | 109 | 82 |
+| With the split | 110 | 109 | 79 |
+
+No measurable gain there: a flat plain seen from above has almost no solid
+overdraw, and the frame may be CPU-bound (the shadow pass submits every
+section and mob a second time). Kept because it does strictly less work for
+the same pixels; a hillside, village or cave view is where a gain would show.
+
 ### Projected FPS impact
 
 FPS is nonlinear, so convert to frame time:

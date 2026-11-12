@@ -27,7 +27,7 @@ option.AMBIENT_INTENSITY=Sky Ambient
 option.MOON_BRIGHTNESS=Moon / Night Brightness
 option.HAZE_AMOUNT=Distance Haze
 option.RAIN_MOOD=Rain Atmosphere
-option.DEBUG_VIEW=Debug View (0 off, 1 color, 2 AO, 3 normals, 4 light, 5 shadow map)
+option.DEBUG_VIEW=Debug View (0 off, 1 color, 2 AO, 3 normals, 4 light, 5 shadow map, 6 program split)
 
 screen.EFFECTS=Effects
 screen.ENVIRONMENT=Environment

@@ -115,8 +115,8 @@
 #define HAZE_AMOUNT 0.50         // [0.00 0.50 1.00 1.50 2.00]
 #define RAIN_MOOD 1.00           // [0.00 0.50 1.00 1.50 2.00]  rain look: cooler, flatter colour, thicker haze, wet darker ground (0 = vanilla-like rain)
 
-// ---- Debug (terrain only): 1 vertex color, 2 AO, 3 normals, 4 lightmap, 5 shadow map ----
-#define DEBUG_VIEW 0             // [0 1 2 3 4 5]
+// ---- Debug (terrain only): 1 vertex color, 2 AO, 3 normals, 4 lightmap, 5 shadow map, 6 solid/cutout program split ----
+#define DEBUG_VIEW 0             // [0 1 2 3 4 5 6]
 
 // Fixed look, not exposed as sliders.
 #define CLOUD_OPACITY 0.75       // clouds are 25% see-through
