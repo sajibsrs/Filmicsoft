@@ -54,7 +54,7 @@ vec3 litSurface(vec3 albedoGamma, vec2 lm, vec3 nWS, float ao, float foliage, fl
 #endif
 #if DEBUG_VIEW == 5
     // Shadow map only: white = lit, black = shadowed, blue = map not used here
-    // (past the distance, low sun, night), so the sky-light fallback applies.
+    // (past the distance, low sun or moon), so the sky-light fallback applies.
     return mix(vec3(0.15, 0.25, 0.85), vec3(sh.x), sh.y);
 #endif
     vec3 rgb = shadeSurface(albedoGamma, lm, nWS, ao, foliage, emissive, sh);

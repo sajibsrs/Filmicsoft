@@ -69,13 +69,14 @@ void main() {
     // Far away, small casters (grass, plants, thin blocks) are smaller than a
     // shadow texel: drop them. Decided per block (centre distance) so all
     // vertices of a quad agree and no triangle is half-clipped.
-    // Only while the sun is above 30 degrees: then a shadow is at most ~1.7x its
-    // caster's height. At low sun a sugar cane or grass shadow runs 10-40 blocks
-    // toward the player, and dropping it at this distance made whole long shadows
-    // pop in and out while walking across the threshold.
+    // Only while the sun (or, at night, the moon) is above 30 degrees: then a
+    // shadow is at most ~1.7x its caster's height. At low sun a sugar cane or
+    // grass shadow runs 10-40 blocks toward the player, and dropping it at this
+    // distance made whole long shadows pop in and out while walking across the
+    // threshold. The moon is opposite the sun, so its height is -sunH.
     float sunH = sin(sunAngle * 6.28318530718);
     if (blockDist > 2.0 * SHADOW_NEAR) {
-        if ((id == 10003 || id == 10005 || id == 10006) && sunH > 0.5) gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
+        if ((id == 10003 || id == 10005 || id == 10006) && abs(sunH) > 0.5) gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
         if (id == 10001) solidCutout = 1;
     }
 #else

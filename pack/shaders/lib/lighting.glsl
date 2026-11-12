@@ -5,7 +5,9 @@
 // the sky-light level of the vanilla lightmap, which already drops under
 // roofs, trees and in caves, so it doubles as a cheap shadow.
 // Optionally (ENABLE_SHADOWS) a small shadow map replaces that fake inside
-// SHADOW_DISTANCE and fades back to it at the edge, at sunset and at night.
+// SHADOW_DISTANCE and fades back to it at the edge and while the sun or moon
+// is low. The map follows Iris's shadow light: the sun by day, the moon by
+// night, so moonlit nights have shadows too.
 
 uniform float sunAngle;
 uniform vec3 shadowLightPosition;
@@ -38,14 +40,22 @@ uniform mat4 shadowProjection;
 #include "/lib/shadowyaw.glsl"
 
 // Shadow lookup for a surface at 'feet' (player space, i.e. relative to the camera).
-// Returns x = sunlight visibility (1 = lit), y = how much to trust it (0 = use the
-// fake sky-light shadow instead). y is 0 past the map, at sunset and at night.
+// Returns x = sun / moon light visibility (1 = lit), y = how much to trust it
+// (0 = use the fake sky-light shadow instead). y is 0 past the map and while
+// the light is low: around dusk and dawn, and across Iris's switch of the
+// shadow light between sun and moon.
 vec2 shadowTerm(vec3 feet, vec3 nWS) {
     if (!hasSkylight) return vec2(1.0, 0.0);
     float h = sin(sunAngle * 6.28318530718);
     float dist = length(feet);
-    float w = (1.0 - smoothstep(0.85 * SHADOW_DISTANCE, 0.98 * SHADOW_DISTANCE, dist))
-            * smoothstep(0.05, 0.25, h);
+    // Day: in from 3 to 14 degrees of sun. Night: the moon's map is only used
+    // from 14 to 24 degrees of moon. Iris swaps the shadow light to the moon at
+    // sunAngle 0.5 and back at 1.0 (vanilla's eased day curve puts those at
+    // ticks ~12785 and ~23215), when the setting light is on the horizon and
+    // the rising one is too: both ramps are zero there, so the map changes
+    // direction while it has no weight and no shadow pops.
+    float lightUp = smoothstep(0.05, 0.25, h) + smoothstep(0.25, 0.40, -h);
+    float w = (1.0 - smoothstep(0.85 * SHADOW_DISTANCE, 0.98 * SHADOW_DISTANCE, dist)) * lightUp;
     if (w <= 0.0) return vec2(1.0, 0.0);
     // Where a texel is bigger than a block, the map can't resolve block shadows and
     // the biases (capped in blocks) can't hold back acne: it only flickers as the
